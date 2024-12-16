@@ -47,6 +47,8 @@ jobs:
       - name: Install dependencies
         run: yarn install
       - name: Build static files
+        env:
+          VITE_VERSION: ${{ inputs.destination_dir }}
         run: yarn build
       # - name: Setup Pages
       #   uses: actions/configure-pages@v5
@@ -60,5 +62,4 @@ jobs:
         with:
           deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }},
           publish_dir: ./dist
-          destination_dir: ${{ inputs.destination_dir }},
-          enable_jekyll: true
+          destination_dir: ${{ inputs.destination_dir }}
