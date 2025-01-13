@@ -219,7 +219,11 @@ export default class LedgerBridge {
   async signTransaction(replyAction, hdPath, tx, messageId) {
     try {
       await this.makeApp();
-      const res = await this.app.clearSignTransaction(hdPath, tx);
+      const res = await this.app.clearSignTransaction(hdPath, tx, {
+        nft: true,
+        externalPlugins: true,
+        erc20: true,
+      });
       this.sendMessageToExtension({
         action: replyAction,
         success: true,
