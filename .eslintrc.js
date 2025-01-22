@@ -22,4 +22,8 @@ module.exports = {
     'docs/',
     '.yarn/',
   ],
+
+  parserOptions: {
+    sourceType: 'module',
+  }
 };

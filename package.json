@@ -4,8 +4,8 @@
   "description": "",
   "license": "ISC",
   "author": "MetaMask",
-  "type": "module",
   "source": "index.html",
+  "type": "module",
   "scripts": {
     "build": "vite build",
     "clear": "rm -rf .yarn/cache dist",
@@ -16,12 +16,6 @@
     "lint:misc": "prettier '**/*.yml' '!.yarnrc.yml' --ignore-path .gitignore --no-error-on-unmatched-pattern",
     "preview": "vite preview",
     "start": "vite"
-  },
-  "dependencies": {
-    "@ledgerhq/hw-app-eth": "6.39.0",
-    "@ledgerhq/hw-transport-http": "^6.30.4",
-    "@ledgerhq/hw-transport-webhid": "^6.29.4",
-    "@ledgerhq/hw-transport-webusb": "^6.29.4"
   },
   "devDependencies": {
     "@metamask/eslint-config": "^11.0.1",
@@ -44,5 +38,11 @@
   "packageManager": "yarn@4.5.0",
   "engines": {
     "node": "^18.18 || >=20"
+  },
+  "dependencies": {
+    "@ledgerhq/context-module": "^1.1.0",
+    "@ledgerhq/device-management-kit": "0.5.1",
+    "@ledgerhq/device-signer-kit-ethereum": "^1.1.0",
+    "rxjs": "^7.8.1"
   }
 }

@@ -1,19 +1,21 @@
-import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
-import TransportWebHID from '@ledgerhq/hw-transport-webhid';
-import LedgerEth from '@ledgerhq/hw-app-eth';
-import WebSocketTransport from '@ledgerhq/hw-transport-http/lib/WebSocketTransport';
+import {
+  ConnectedDevice,
+  ConsoleLogger,
+  DeviceManagementKit,
+  DeviceManagementKitBuilder,
+  TransportIdentifier,
+} from '@ledgerhq/device-management-kit';
 
-// URL which triggers Ledger Live app to open and handle communication
-const BRIDGE_URL = 'ws://localhost:8435';
-
-// Number of seconds to poll for Ledger Live and Ethereum app opening
-const TRANSPORT_CHECK_DELAY = 1000;
-const TRANSPORT_CHECK_LIMIT = 120;
-
+const WEBHID = 'WEB-HID';
 export default class LedgerBridge {
+  dmk;
+
   constructor() {
+    this.dmk = new DeviceManagementKitBuilder()
+      .addLogger(new ConsoleLogger())
+      .build();
     this.addEventListeners();
-    this.transportType = 'u2f';
+    this.transportType = WEBHID;
   }
 
   addEventListeners() {
@@ -49,19 +51,10 @@ export default class LedgerBridge {
               this.cleanUp(replyAction, messageId);
               break;
             case 'ledger-update-transport':
-              if (
-                params.transportType === 'ledgerLive' ||
-                params.useLedgerLive
-              ) {
+              if (params.transportType === 'webhid') {
                 this.updateTransportTypePreference(
                   replyAction,
-                  'ledgerLive',
-                  messageId,
-                );
-              } else if (params.transportType === 'webhid') {
-                this.updateTransportTypePreference(
-                  replyAction,
-                  'webhid',
+                  'WEB-HID',
                   messageId,
                 );
               } else {
@@ -94,22 +87,6 @@ export default class LedgerBridge {
     window.parent.postMessage(msg, '*');
   }
 
-  delay(ms) {
-    return new Promise((success) => setTimeout(success, ms));
-  }
-
-  checkTransportLoop(i) {
-    const iterator = i || 0;
-    return WebSocketTransport.check(BRIDGE_URL).catch(async () => {
-      await this.delay(TRANSPORT_CHECK_DELAY);
-      if (iterator < TRANSPORT_CHECK_LIMIT) {
-        return this.checkTransportLoop(iterator + 1);
-      } else {
-        throw new Error('Ledger transport check timeout');
-      }
-    });
-  }
-
   async attemptMakeApp(replyAction, messageId) {
     try {
       await this.makeApp({ openOnly: true });
@@ -132,34 +109,45 @@ export default class LedgerBridge {
 
   async makeApp(config = {}) {
     try {
-      if (this.transportType === 'ledgerLive') {
-        let reestablish = false;
-        try {
-          await WebSocketTransport.check(BRIDGE_URL);
-        } catch (_err) {
-          window.open('ledgerlive://bridge?appName=Ethereum');
-          await this.checkTransportLoop();
-          reestablish = true;
+      if (this.transportType === WEBHID) {
+        if (!this.connectedDevice) {
+          const dmkSdk = this.dmk;
+          console.log('Attempting to make app');
+          dmkSdk.startDiscovering({ transport: webHidIdentifier }).subscribe({
+            next: (device) => {
+              console.log('Device found:', device);
+              dmkSdk.connect({ device }).then((sessionId) => {
+                const connectedDevice = dmkSdk.getConnectedDevice({
+                  sessionId,
+                });
+                console.log('Connected device:', connectedDevice);
+                this.connectedDevice = connectedDevice;
+                this.sessionId = sessionId;
+              });
+            },
+            error: (error) => {
+              console.error('Error:', error);
+            },
+            complete: () => {
+              console.log('Discovery complete');
+            },
+          });
         }
-        if (!this.app || reestablish) {
-          this.transport = await WebSocketTransport.open(BRIDGE_URL);
-          this.app = new LedgerEth(this.transport);
-        }
-      } else if (this.transportType === 'webhid') {
-        const device = this.transport && this.transport.device;
-        const nameOfDeviceType = device && device.constructor.name;
-        const deviceIsOpen = device && device.opened;
-        if (this.app && nameOfDeviceType === 'HIDDevice' && deviceIsOpen) {
-          return;
-        }
-        this.transport = config.openOnly
-          ? await TransportWebHID.openConnected()
-          : await TransportWebHID.create();
-        this.app = new LedgerEth(this.transport);
-      } else {
-        this.transport = await TransportWebUSB.create();
-        this.app = new LedgerEth(this.transport);
       }
+      //   const device = this.transport && this.transport.device;
+      //   const nameOfDeviceType = device && device.constructor.name;
+      //   const deviceIsOpen = device && device.opened;
+      //   if (this.app && nameOfDeviceType === 'HIDDevice' && deviceIsOpen) {
+      //     return;
+      //   }
+      //   this.transport = config.openOnly
+      //     ? await TransportWebHID.openConnected()
+      //     : await TransportWebHID.create();
+      //   this.app = new LedgerEth(this.transport);
+      // } else {
+      //   this.transport = await TransportWebUSB.create();
+      //   this.app = new LedgerEth(this.transport);
+      // }
     } catch (e) {
       console.log('LEDGER:::CREATE APP ERROR', e);
       throw e;
