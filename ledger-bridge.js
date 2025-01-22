@@ -206,7 +206,7 @@ export default class LedgerBridge {
       this.sendMessageToExtension({
         action: replyAction,
         success: false,
-        payload: { error: JSON.stringify(e) },
+        payload: { error: e },
         messageId,
       });
     } finally {
@@ -235,7 +235,7 @@ export default class LedgerBridge {
       this.sendMessageToExtension({
         action: replyAction,
         success: false,
-        payload: { error: JSON.stringify(e) },
+        payload: { error: e },
         messageId,
       });
     } finally {
@@ -261,7 +261,7 @@ export default class LedgerBridge {
       this.sendMessageToExtension({
         action: replyAction,
         success: false,
-        payload: { error: JSON.stringify(e) },
+        payload: { error: e },
         messageId,
       });
     } finally {
@@ -287,7 +287,7 @@ export default class LedgerBridge {
       this.sendMessageToExtension({
         action: replyAction,
         success: false,
-        payload: { error: JSON.stringify(e) },
+        payload: { error: e },
         messageId,
       });
     } finally {
