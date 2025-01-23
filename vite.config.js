@@ -21,7 +21,7 @@ export default defineConfig({
     //     manualChunks,
     //   },
     // },
-    // target: 'es2015',
+    target: 'es2015',
     outDir: 'dist',
     sourcemap: false,
   },
