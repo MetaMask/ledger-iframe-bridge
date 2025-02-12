@@ -1,21 +1,21 @@
 import {
-  ConnectedDevice,
   ConsoleLogger,
-  DeviceManagementKit,
   DeviceManagementKitBuilder,
-  TransportIdentifier,
 } from '@ledgerhq/device-management-kit';
+import { SignerEthBuilder } from '@ledgerhq/device-signer-kit-ethereum';
+import { webHidTransportFactory } from '@ledgerhq/device-transport-kit-web-hid';
+import { webBleTransportFactory } from '@ledgerhq/device-transport-kit-web-ble';
+import { Observable } from 'rxjs';
 
 const WEBHID = 'WEB-HID';
+const BLE = 'WEB-BLE';
+
 export default class LedgerBridge {
-  dmk;
+  sessionId;
+  transportType;
 
   constructor() {
-    this.dmk = new DeviceManagementKitBuilder()
-      .addLogger(new ConsoleLogger())
-      .build();
     this.addEventListeners();
-    this.transportType = WEBHID;
   }
 
   addEventListeners() {
@@ -51,19 +51,19 @@ export default class LedgerBridge {
               this.cleanUp(replyAction, messageId);
               break;
             case 'ledger-update-transport':
-              if (params.transportType === 'webhid') {
-                this.updateTransportTypePreference(
-                  replyAction,
-                  'WEB-HID',
-                  messageId,
-                );
-              } else {
-                this.updateTransportTypePreference(
-                  replyAction,
-                  'u2f',
-                  messageId,
-                );
-              }
+              // if (params.transportType === WEBHID) {
+              this.updateTransportTypePreference(
+                replyAction,
+                WEBHID,
+                messageId,
+              );
+              // } else {
+              // this.updateTransportTypePreference(
+              //   replyAction,
+              //   WEBHID,
+              //   messageId,
+              // );
+              // }
               break;
             case 'ledger-make-app':
               this.attemptMakeApp(replyAction, messageId);
@@ -89,15 +89,14 @@ export default class LedgerBridge {
 
   async attemptMakeApp(replyAction, messageId) {
     try {
-      await this.makeApp({ openOnly: true });
-      await this.cleanUp();
+      // await this.makeApp({ openOnly: true });
       this.sendMessageToExtension({
         action: replyAction,
         success: true,
         messageId,
       });
     } catch (error) {
-      await this.cleanUp();
+      await this.cleanUp(replyAction, messageId);
       this.sendMessageToExtension({
         action: replyAction,
         success: false,
@@ -107,56 +106,64 @@ export default class LedgerBridge {
     }
   }
 
-  async makeApp(config = {}) {
-    try {
-      if (this.transportType === WEBHID) {
-        if (!this.connectedDevice) {
-          const dmkSdk = this.dmk;
+  makeApp(config = {}) {
+    const self = this;
+
+    return new Observable((subscriber) => {
+      if (self.transportType === WEBHID) {
+        if (!self.sessionId) {
           console.log('Attempting to make app');
-          dmkSdk.startDiscovering({ transport: webHidIdentifier }).subscribe({
+          const dmk = new DeviceManagementKitBuilder()
+            .addLogger(new ConsoleLogger())
+            .addTransport(webHidTransportFactory)
+            .addTransport(webBleTransportFactory)
+            .addLogger(new ConsoleLogger())
+            // .addLogger(new FlipperDmkLogger())
+            .build();
+
+          dmk.startDiscovering({ transport: WEBHID }).subscribe({
             next: (device) => {
               console.log('Device found:', device);
-              dmkSdk.connect({ device }).then((sessionId) => {
-                const connectedDevice = dmkSdk.getConnectedDevice({
+              self.dmk.connect({ device }).then((sessionId) => {
+                const connectedDevice = self.dmk.getConnectedDevice({
                   sessionId,
                 });
                 console.log('Connected device:', connectedDevice);
-                this.connectedDevice = connectedDevice;
-                this.sessionId = sessionId;
+
+                self.sessionId = sessionId;
+                subscriber.next(
+                  new SignerEthBuilder({
+                    dmk: self.dmk,
+                    sessionId,
+                  }).build(),
+                );
               });
             },
             error: (error) => {
               console.error('Error:', error);
+              subscriber.reject(error);
             },
             complete: () => {
               console.log('Discovery complete');
+              subscriber.complete();
             },
           });
+        } else {
+          subscriber.next(
+            new SignerEthBuilder({
+              dmk: this.dmk,
+              sessionId: this.sessionId,
+            }).build(),
+          );
         }
       }
-      //   const device = this.transport && this.transport.device;
-      //   const nameOfDeviceType = device && device.constructor.name;
-      //   const deviceIsOpen = device && device.opened;
-      //   if (this.app && nameOfDeviceType === 'HIDDevice' && deviceIsOpen) {
-      //     return;
-      //   }
-      //   this.transport = config.openOnly
-      //     ? await TransportWebHID.openConnected()
-      //     : await TransportWebHID.create();
-      //   this.app = new LedgerEth(this.transport);
-      // } else {
-      //   this.transport = await TransportWebUSB.create();
-      //   this.app = new LedgerEth(this.transport);
-      // }
-    } catch (e) {
-      console.log('LEDGER:::CREATE APP ERROR', e);
-      throw e;
-    }
+    });
   }
 
   updateTransportTypePreference(replyAction, transportType, messageId) {
+    // this.transportType = transportType;
+    this.cleanUp(replyAction, messageId);
     this.transportType = transportType;
-    this.cleanUp();
     this.sendMessageToExtension({
       action: replyAction,
       success: true,
@@ -164,12 +171,10 @@ export default class LedgerBridge {
     });
   }
 
-  async cleanUp(replyAction, messageId) {
-    this.app = null;
-    if (this.transport) {
-      await this.transport.close();
-      this.transport = null;
-    }
+  cleanUp(replyAction, messageId) {
+    this.sessionId = undefined;
+    // this.connectedDevice = undefined;
+
     if (replyAction) {
       this.sendMessageToExtension({
         action: replyAction,
@@ -179,108 +184,131 @@ export default class LedgerBridge {
     }
   }
 
-  async unlock(replyAction, hdPath, messageId) {
-    try {
-      await this.makeApp();
-      const res = await this.app.getAddress(hdPath, false, true);
-      this.sendMessageToExtension({
-        action: replyAction,
-        success: true,
-        payload: res,
-        messageId,
-      });
-    } catch (err) {
-      const e = this.ledgerErrToMessage(err);
-      this.sendMessageToExtension({
-        action: replyAction,
-        success: false,
-        payload: { error: e },
-        messageId,
-      });
-    } finally {
-      if (this.transportType !== 'ledgerLive') {
-        this.cleanUp();
-      }
-    }
+  unlock(replyAction, hdPath, messageId) {
+    const self = this;
+    this.makeApp().subscribe({
+      next: (app) => {
+        app
+          .getAddress(hdPath, {
+            checkOnDevice: false,
+            returnChainCode: false,
+          })
+          .subscribe({
+            next: (response) => {
+              console.warn(response);
+              self.sendMessageToExtension({
+                action: replyAction,
+                success: true,
+                payload: response.address,
+                messageId,
+              });
+            },
+            error: (error) => {
+              console.error(error);
+              self.sendMessageToExtension({
+                action: replyAction,
+                success: false,
+                payload: { error: error },
+                messageId,
+              });
+            },
+            complete: () => {
+              console.log('unlock completed');
+            },
+          });
+      },
+    });
   }
 
-  async signTransaction(replyAction, hdPath, tx, messageId) {
-    try {
-      await this.makeApp();
-      const res = await this.app.clearSignTransaction(hdPath, tx, {
-        nft: true,
-        externalPlugins: true,
-        erc20: true,
-      });
-      this.sendMessageToExtension({
-        action: replyAction,
-        success: true,
-        payload: res,
-        messageId,
-      });
-    } catch (err) {
-      const e = this.ledgerErrToMessage(err);
-      this.sendMessageToExtension({
-        action: replyAction,
-        success: false,
-        payload: { error: e },
-        messageId,
-      });
-    } finally {
-      if (this.transportType !== 'ledgerLive') {
-        this.cleanUp();
-      }
-    }
+  signTransaction(replyAction, hdPath, tx, messageId) {
+    const self = this;
+    this.makeApp().subscribe({
+      next: (app) => {
+        app.signTransaction(hdPath, tx).subscribe({
+          next: (response) => {
+            console.log(response);
+            self.sendMessageToExtension({
+              action: replyAction,
+              success: true,
+              payload: {
+                r: response.r,
+                s: response.s,
+                v: response.v,
+              },
+              messageId,
+            });
+          },
+          error: (error) => {
+            self.error(error);
+          },
+          complete: () => {
+            console.log('signTransaction completed');
+          },
+        });
+      },
+    });
   }
 
-  async signPersonalMessage(replyAction, hdPath, message, messageId) {
-    try {
-      await this.makeApp();
-
-      const res = await this.app.signPersonalMessage(hdPath, message);
-      this.sendMessageToExtension({
-        action: replyAction,
-        success: true,
-        payload: res,
-        messageId,
-      });
-    } catch (err) {
-      const e = this.ledgerErrToMessage(err);
-      this.sendMessageToExtension({
-        action: replyAction,
-        success: false,
-        payload: { error: e },
-        messageId,
-      });
-    } finally {
-      if (this.transportType !== 'ledgerLive') {
-        this.cleanUp();
-      }
-    }
+  signPersonalMessage(replyAction, hdPath, message, messageId) {
+    const self = this;
+    self.makeApp().subscribe({
+      next: (app) => {
+        app.signPersonalMessage(hdPath, message).subscribe({
+          next: (response) => {
+            console.log(response);
+            self.sendMessageToExtension({
+              action: replyAction,
+              success: true,
+              payload: response,
+              messageId,
+            });
+          },
+          error: (error) => {
+            console.error(error);
+            self.sendMessageToExtension({
+              action: replyAction,
+              success: false,
+              payload: { error: error },
+              messageId,
+            });
+          },
+          complete: () => {
+            console.log('signPersonalMessage completed');
+          },
+        });
+      },
+    });
   }
 
   async signTypedData(replyAction, hdPath, message, messageId) {
-    try {
-      await this.makeApp();
-      const res = await this.app.signEIP712Message(hdPath, message);
-
-      this.sendMessageToExtension({
-        action: replyAction,
-        success: true,
-        payload: res,
-        messageId,
-      });
-    } catch (err) {
-      const e = this.ledgerErrToMessage(err);
-      this.sendMessageToExtension({
-        action: replyAction,
-        success: false,
-        payload: { error: e },
-        messageId,
-      });
-    } finally {
-      this.cleanUp();
-    }
+    const self = this;
+    self.makeApp().subscribe({
+      next: (app) => {
+        app.signEIP712Message(hdPath, message).subscribe({
+          next: (response) => {
+            console.log(response);
+            self.sendMessageToExtension({
+              action: replyAction,
+              success: true,
+              payload: response,
+              messageId,
+            });
+          },
+          error: (error) => {
+            console.error(error);
+            self.sendMessageToExtension({
+              action: replyAction,
+              success: false,
+              payload: { error: error },
+              messageId,
+            });
+          },
+          complete: () => {
+            console.log('signPersonalMessage completed');
+          },
+        });
+      },
+    });
   }
 
   ledgerErrToMessage(err) {
@@ -294,12 +322,12 @@ export default class LedgerBridge {
       err.message && err.message.includes('OpenFailed');
 
     // https://developers.yubico.com/U2F/Libraries/Client_error_codes.html
-    if (isU2FError(err)) {
-      if (err.metaData.code === 5) {
-        return new Error('LEDGER_TIMEOUT');
-      }
-      return err.metaData.type;
-    }
+    // if (isU2FError(err)) {
+    //   if (err.metaData.code ===  ) {
+    //     return new Error('LEDGER_TIMEOUT');
+    //   }
+    //   return err.metaData.type;
+    // }
 
     if (isWrongAppError(err)) {
       return new Error('LEDGER_WRONG_APP');
