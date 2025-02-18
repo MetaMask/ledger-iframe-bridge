@@ -1,10 +1,14 @@
 import { defineConfig } from 'vite';
 import legacy from '@vitejs/plugin-legacy';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
+import react from '@vitejs/plugin-react';
+import tailwindcss from 'tailwindcss';
+import autoprefixer from 'autoprefixer';
 
 export default defineConfig({
   base: './',
   plugins: [
+    react(),
     [
       // legacy({
       //   // This will generate both modern and legacy builds, with the legacy build targeting not IE 11
@@ -14,6 +18,14 @@ export default defineConfig({
       nodePolyfills(),
     ],
   ],
+  css: {
+    postcss: {
+      plugins: [
+        tailwindcss(),
+        autoprefixer()
+      ]
+    }
+  },
   build: {
     // chunkSizeWarningLimit: 1000,
     // rollupOptions: {

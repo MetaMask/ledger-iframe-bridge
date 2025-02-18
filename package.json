@@ -7,20 +7,21 @@
   "source": "index.html",
   "type": "module",
   "scripts": {
+    "dev": "vite",
     "build": "vite build",
-    "clear": "rm -rf .yarn/cache dist",
+    "preview": "vite preview",
     "lint": "yarn lint:eslint && yarn lint:misc --check && yarn lint:dependencies",
     "lint:dependencies": "depcheck",
-    "lint:eslint": "eslint --cache --ext js,ts",
-    "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write && yarn lint:dependencies",
-    "lint:misc": "prettier '**/*.yml' '!.yarnrc.yml' --ignore-path .gitignore --no-error-on-unmatched-pattern",
-    "preview": "vite preview",
-    "start": "vite"
+    "lint:eslint": "eslint .",
+    "lint:misc": "prettier --check .",
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "@metamask/eslint-config": "^11.0.1",
     "@metamask/eslint-config-nodejs": "^11.0.0",
     "@vitejs/plugin-legacy": "^5.4.2",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.16",
     "depcheck": "^1.4.3",
     "eslint": "^8.55.0",
     "eslint-config-prettier": "^8.5.0",
@@ -28,9 +29,12 @@
     "eslint-plugin-jsdoc": "^39.6.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "postcss": "^8.4.31",
     "prettier": "^2.7.1",
     "prettier-plugin-packagejson": "^2.2.12",
+    "tailwindcss": "^3.3.3",
     "terser": "^5.10.0",
+    "typescript": "^5.2.2",
     "vite": "^5.3.5",
     "vite-plugin-node-polyfills": "^0.22.0"
   },
@@ -41,9 +45,19 @@
   "dependencies": {
     "@ledgerhq/context-module": "^1.1.0",
     "@ledgerhq/device-management-kit": "^0.6.0",
-    "@ledgerhq/device-signer-kit-ethereum": "^1.1.0",
+    "@ledgerhq/device-signer-kit-ethereum": "0.0.0-signer-eth-20250122093657",
     "@ledgerhq/device-transport-kit-web-ble": "^1.0.0",
     "@ledgerhq/device-transport-kit-web-hid": "^1.0.1",
-    "rxjs": "^7.8.1"
+    "@radix-ui/react-dropdown-menu": "^2.0.2",
+    "@tailwindcss/typography": "^0.5.10",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.1.5",
+    "rxjs": "^7.8.1",
+    "tailwind-merge": "^2.0.0"
   }
 }
