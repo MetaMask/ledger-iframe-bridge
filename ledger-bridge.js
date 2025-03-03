@@ -2,6 +2,7 @@ import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
 import TransportWebHID from '@ledgerhq/hw-transport-webhid';
 import LedgerEth from '@ledgerhq/hw-app-eth';
 import WebSocketTransport from '@ledgerhq/hw-transport-http/lib/WebSocketTransport';
+import { SignTypedDataVersion, TypedDataUtils } from '@metamask/eth-sig-util';
 
 // URL which triggers Ledger Live app to open and handle communication
 const BRIDGE_URL = 'ws://localhost:8435';
@@ -274,7 +275,9 @@ export default class LedgerBridge {
   async signTypedData(replyAction, hdPath, message, messageId) {
     try {
       await this.makeApp();
-      const res = await this.app.signEIP712Message(hdPath, message);
+
+      // Try the primary method first
+      let res = await this.attemptSignEIP712Message(hdPath, message);
 
       this.sendMessageToExtension({
         action: replyAction,
@@ -292,6 +295,36 @@ export default class LedgerBridge {
       });
     } finally {
       this.cleanUp();
+    }
+  }
+
+  async attemptSignEIP712Message(hdPath, message) {
+    try {
+      // Try the primary signing method
+      return await this.app.signEIP712Message(hdPath, message);
+    } catch (signError) {
+      // Fallback to signEIP712HashedMessage if signEIP712Message fails (e.g., for Nano S)
+      // Extract hashStructMessageHex and domainSeparatorHex from the message object
+      const domainSeparatorHex = TypedDataUtils.hashStruct(
+        'EIP712Domain',
+        message.domain,
+        message.types,
+        SignTypedDataVersion.V4,
+      ).toString('hex');
+
+      const hashStructMessageHex = TypedDataUtils.hashStruct(
+        message.primaryType,
+        message.message,
+        message.types,
+        SignTypedDataVersion.V4,
+      ).toString('hex');
+
+      // Try the fallback signing method
+      return await this.app.signEIP712HashedMessage(
+        hdPath,
+        domainSeparatorHex,
+        hashStructMessageHex,
+      );
     }
   }
 
