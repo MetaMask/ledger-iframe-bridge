@@ -275,10 +275,10 @@ export default class LedgerBridge {
   async signTypedData(replyAction, hdPath, message, messageId) {
     try {
       await this.makeApp();
-      
+
       // Try the primary method first
       let res = await this.attemptSignEIP712Message(hdPath, message);
-      
+
       this.sendMessageToExtension({
         action: replyAction,
         success: true,
@@ -311,7 +311,7 @@ export default class LedgerBridge {
         message.types,
         SignTypedDataVersion.V4,
       ).toString('hex');
-      
+
       const hashStructMessageHex = TypedDataUtils.hashStruct(
         message.primaryType,
         message.message,
