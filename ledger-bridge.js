@@ -26,6 +26,13 @@ export default class LedgerBridge {
           const replyAction = `${action}-reply`;
 
           switch (action) {
+            case 'ledger-is-iframe-ready':
+              this.sendMessageToExtension({
+                action: replyAction,
+                success: true,
+                messageId,
+              });
+              break;
             case 'ledger-unlock':
               this.unlock(replyAction, params.hdPath, messageId);
               break;
