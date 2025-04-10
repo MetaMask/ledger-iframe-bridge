@@ -11,7 +11,7 @@ export default function useAvailableDevices(){
     if (!dmk) return;
     if (!subscription.current) {
       console.log('subscription is not current, making new subscription');
-      subscription.current = dmk.listenToKnownDevices().subscribe((devices) => {
+      subscription.current = dmk.listenToAvailableDevices({}).subscribe((devices) => {
         console.log('devices is', devices);
         setDiscoveredDevices(devices);
       });
