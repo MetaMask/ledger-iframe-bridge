@@ -1514,9 +1514,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ledgerhq/context-module@npm:^1.3.1":
-  version: 1.3.1
-  resolution: "@ledgerhq/context-module@npm:1.3.1"
+"@ledgerhq/context-module@npm:0.0.0-EIP7702-20250418164917":
+  version: 0.0.0-EIP7702-20250418164917
+  resolution: "@ledgerhq/context-module@npm:0.0.0-EIP7702-20250418164917"
   dependencies:
     axios: "npm:^1.8.2"
     crypto-js: "npm:^4.2.0"
@@ -1525,14 +1525,14 @@ __metadata:
     purify-ts: "npm:^2.1.0"
     reflect-metadata: "npm:^0.2.2"
   peerDependencies:
-    "@ledgerhq/device-management-kit": 0.6.5
-  checksum: 10/9e90cfd990fd6ae91b7e0b762f88024500b338a1f9abe0a062caaf30d2d007cf76597297f7f0b2b10008c3c19cae4cf019278d2c9a635c116f7439f43686a735
+    "@ledgerhq/device-management-kit": 0.0.0-EIP7702-20250418164917
+  checksum: 10/9dc9bfcf476a9600af8765cc3cff86517518c851e87d3f54d05fe45397095815f26b5b6258284eaa1c907d29bd8ff32ea1b7e149996362f790064b8dc563fab5
   languageName: node
   linkType: hard
 
-"@ledgerhq/device-management-kit@npm:^0.6.5":
-  version: 0.6.5
-  resolution: "@ledgerhq/device-management-kit@npm:0.6.5"
+"@ledgerhq/device-management-kit@npm:0.0.0-EIP7702-20250418164917":
+  version: 0.0.0-EIP7702-20250418164917
+  resolution: "@ledgerhq/device-management-kit@npm:0.0.0-EIP7702-20250418164917"
   dependencies:
     "@sentry/minimal": "npm:^6.19.7"
     axios: "npm:^1.8.2"
@@ -1548,15 +1548,15 @@ __metadata:
     xstate: "npm:^5.19.2"
   peerDependencies:
     rxjs: ^7.8.2
-  checksum: 10/4285640388ac2072654f1e779bb362f7ea36c67918f610c2c38b4adc88796db464032741b2e29f4b2928e4726b3680704023cdffa5e32a49232822f5d5a32387
+  checksum: 10/feab27e6ec80945e12566ed850e35918454d3227166a278500b3280704006ea9b7199de814b96cedcb37fc4c973009d935046d825bdbe8b13452ff98a22cb376
   languageName: node
   linkType: hard
 
-"@ledgerhq/device-signer-kit-ethereum@npm:^1.3.3":
-  version: 1.3.3
-  resolution: "@ledgerhq/device-signer-kit-ethereum@npm:1.3.3"
+"@ledgerhq/device-signer-kit-ethereum@npm:0.0.0-EIP7702-20250418164917":
+  version: 0.0.0-EIP7702-20250418164917
+  resolution: "@ledgerhq/device-signer-kit-ethereum@npm:0.0.0-EIP7702-20250418164917"
   dependencies:
-    "@ledgerhq/signer-utils": "npm:^1.0.4"
+    "@ledgerhq/signer-utils": "npm:0.0.0-EIP7702-20250418164917"
     ethers: "npm:6.13.4"
     inversify: "npm:^6.2.2"
     inversify-logger-middleware: "npm:^3.1.0"
@@ -1565,46 +1565,46 @@ __metadata:
     semver: "npm:^7.6.3"
     xstate: "npm:^5.19.2"
   peerDependencies:
-    "@ledgerhq/context-module": ^1.3.1
-    "@ledgerhq/device-management-kit": ^0.6.5
-  checksum: 10/9856040a5132267ac67f06e74176e5d5ad7c8e96405b8bfcff0e23faa97197646d9f13bd7ce97ece6258d1193781f60c0601e19c20db01791d92e61672a50a5b
+    "@ledgerhq/context-module": 0.0.0-EIP7702-20250418164917
+    "@ledgerhq/device-management-kit": 0.0.0-EIP7702-20250418164917
+  checksum: 10/acbf907e3b17fd2fc4d8e2d18ab42d25cde81d24dd160483cdb3a530243375b047419495ee48241d911c4afa47ccb9cc29d9214ade1ed49bc289185fd8cd9d50
   languageName: node
   linkType: hard
 
-"@ledgerhq/device-transport-kit-web-ble@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@ledgerhq/device-transport-kit-web-ble@npm:1.1.0"
+"@ledgerhq/device-transport-kit-web-ble@npm:0.0.0-EIP7702-20250418164917":
+  version: 0.0.0-EIP7702-20250418164917
+  resolution: "@ledgerhq/device-transport-kit-web-ble@npm:0.0.0-EIP7702-20250418164917"
   dependencies:
     "@sentry/minimal": "npm:^6.19.7"
     purify-ts: "npm:^2.1.0"
     uuid: "npm:^11.0.3"
   peerDependencies:
-    "@ledgerhq/device-management-kit": 0.6.2
+    "@ledgerhq/device-management-kit": 0.0.0-EIP7702-20250418164917
     rxjs: ^7.8.2
-  checksum: 10/fdb3d648ee1a8ed006086b435aedf08fb863d629dc96aa368bcc96dfa8729db3c987e2ba0b5e68b13edda34afe4213d95eaf0c3be9ea645ce348966a811c955e
+  checksum: 10/d624f047be831f310cfce18d702b23ba02cf8c6999f74049b3ecbaa54d4d15c25d3333ac7e9ce000aab79e7a0937e142992fa092810a086c9b20a15cb24b7826
   languageName: node
   linkType: hard
 
-"@ledgerhq/device-transport-kit-web-hid@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@ledgerhq/device-transport-kit-web-hid@npm:1.1.0"
+"@ledgerhq/device-transport-kit-web-hid@npm:0.0.0-EIP7702-20250418164917":
+  version: 0.0.0-EIP7702-20250418164917
+  resolution: "@ledgerhq/device-transport-kit-web-hid@npm:0.0.0-EIP7702-20250418164917"
   dependencies:
     "@sentry/minimal": "npm:^6.19.7"
     purify-ts: "npm:^2.1.0"
     uuid: "npm:^11.0.3"
   peerDependencies:
-    "@ledgerhq/device-management-kit": ">=0.6.2"
+    "@ledgerhq/device-management-kit": 0.0.0-EIP7702-20250418164917
     rxjs: ^7.8.2
-  checksum: 10/ec959c0d647c6ed6156171a9e708cd6d185f62cc3b2048fb5bae8cb317cd42f80b8a7166dc42ed928574257bdca63bf1331b4261f90281c81be2046d5bbf6414
+  checksum: 10/c97ce5c6b2aa0e72cb09d6b1e1f5803c3dd63c9afece9d4810a021bd073b82f3320978d5d046c47d8bba61f14763226231a81565055d08daf25a54f36281b324
   languageName: node
   linkType: hard
 
-"@ledgerhq/signer-utils@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "@ledgerhq/signer-utils@npm:1.0.4"
+"@ledgerhq/signer-utils@npm:0.0.0-EIP7702-20250418164917":
+  version: 0.0.0-EIP7702-20250418164917
+  resolution: "@ledgerhq/signer-utils@npm:0.0.0-EIP7702-20250418164917"
   peerDependencies:
-    "@ledgerhq/device-management-kit": 0.6.2
-  checksum: 10/10357e9355f48ac33baa64202e996cce8fc1d73e9bfd754c49baab3fb34b7ab0d61bc9966ee6e3f42220236c779762f15419a754451ddb9fa8d22ca5b9de1e7d
+    "@ledgerhq/device-management-kit": 0.0.0-EIP7702-20250418164917
+  checksum: 10/33f33018b2381e26505ca0ac9a27eab8a799995d3305069afbfc49cee66c47f0ff4199c6ec503f1d61dff897a30e7028cc750c7298db506e1460d58a2a2df12a
   languageName: node
   linkType: hard
 
@@ -1637,11 +1637,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@metamask/ledger-iframe-bridge@workspace:."
   dependencies:
-    "@ledgerhq/context-module": "npm:^1.3.1"
-    "@ledgerhq/device-management-kit": "npm:^0.6.5"
-    "@ledgerhq/device-signer-kit-ethereum": "npm:^1.3.3"
-    "@ledgerhq/device-transport-kit-web-ble": "npm:^1.1.0"
-    "@ledgerhq/device-transport-kit-web-hid": "npm:^1.1.0"
+    "@ledgerhq/context-module": "npm:0.0.0-EIP7702-20250418164917"
+    "@ledgerhq/device-management-kit": "npm:0.0.0-EIP7702-20250418164917"
+    "@ledgerhq/device-signer-kit-ethereum": "npm:0.0.0-EIP7702-20250418164917"
+    "@ledgerhq/device-transport-kit-web-ble": "npm:0.0.0-EIP7702-20250418164917"
+    "@ledgerhq/device-transport-kit-web-hid": "npm:0.0.0-EIP7702-20250418164917"
     "@metamask/eslint-config": "npm:^11.0.1"
     "@metamask/eslint-config-nodejs": "npm:^11.0.0"
     "@radix-ui/react-dropdown-menu": "npm:^2.0.2"
