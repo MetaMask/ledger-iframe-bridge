@@ -7,33 +7,20 @@ import autoprefixer from 'autoprefixer';
 
 export default defineConfig({
   base: './',
-  plugins: [
-    react(),
-    [
-      // legacy({
-      //   // This will generate both modern and legacy builds, with the legacy build targeting not IE 11
-      //   // and the modern build targeting the last 2 versions of all browsers and not dead browsers
-      //   targets: ['last 2 versions, not dead, > 0.2%', 'not IE 11'],
-      // }),
-      nodePolyfills(),
-    ],
-  ],
+  plugins: [react(), [nodePolyfills()]],
   css: {
     postcss: {
-      plugins: [
-        tailwindcss(),
-        autoprefixer()
-      ]
-    }
+      plugins: [tailwindcss(), autoprefixer()],
+    },
   },
   build: {
-    // chunkSizeWarningLimit: 1000,
-    // rollupOptions: {
-    //   output: {
-    //     manualChunks,
-    //   },
-    // },
-    target: 'esnext',
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks,
+      },
+    },
+    target: 'es2022',
     outDir: 'dist',
     sourcemap: false,
   },

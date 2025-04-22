@@ -23,11 +23,11 @@ export const LedgerBridgeProvider = ({ children }) => {
   useEffect(() => {
     const bridge = initializeLedgerBridge();
     setLedgerBridge(bridge);
-    const sessionId = bridge && bridge.sessionId;
-    const dmk = bridge && bridge.dmk;
-    const connectedDevice = bridge && bridge.connectedDevice;
+    const sessionId = bridge?.sessionId;
+    const dmk = bridge?.dmk;
+    const connectedDevice = bridge?.connectedDevice;
     const status = sessionId ? 'Connected' : 'Disconnected';
-    const transportType = bridge && bridge.transportType === WEBHID ? 'USB' : 'Bluetooth';
+    const transportType = bridge?.transportType === WEBHID ? 'USB' : 'Bluetooth';
     setDmk(dmk);
     setSessionId(sessionId);
     setConnectedDevice(connectedDevice);
@@ -38,11 +38,11 @@ export const LedgerBridgeProvider = ({ children }) => {
       //reset ledger bridge
       const bridge = getLedgerBridge();
       setLedgerBridge(bridge);
-      const sessionId = bridge && bridge.sessionId;
-      const dmk = bridge && bridge.dmk;
-      const connectedDevice = bridge && bridge.connectedDevice;
+      const sessionId = bridge?.sessionId;
+      const dmk = bridge?.dmk;
+      const connectedDevice = bridge?.connectedDevice;
       const status = sessionId ? 'Connected' : 'Disconnected';
-      const transportType = bridge && bridge.transportType === WEBHID ? 'USB' : 'Bluetooth';
+      const transportType = bridge?.transportType === WEBHID ? 'USB' : 'Bluetooth';
       setDmk(dmk);
       setSessionId(sessionId);
       setConnectedDevice(connectedDevice);

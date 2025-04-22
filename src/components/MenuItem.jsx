@@ -29,6 +29,7 @@ export default function MenuItem({ icon, label, id }) {
       className="menu-item"
       onClick={handleClick}
       disabled={isDisabled}
+      type="button"
     >
       <span className="icon">{icon}</span>
       <span className="label">{label}</span>

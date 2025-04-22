@@ -1,3 +1,4 @@
+import { ContextModuleBuilder } from '@ledgerhq/context-module';
 import {
   DeviceManagementKitBuilder,
   DeviceActionStatus,
@@ -137,28 +138,47 @@ export default class LedgerBridge {
 
   makeApp(config = {}) {
     console.log('makeApp');
-    const self = this;
-    if (!self.transportType) {
-      self.transportType = WEBHID;
+    if (!this.transportType) {
+      this.transportType = WEBHID;
     }
+
+    const calConfig = {
+      url: 'https://crypto-assets-service.api.ledger.com/v1',
+      mode: 'prod',
+      branch: 'main',
+    };
+
+    const web3ChecksConfig = {
+      url: 'https://web3checks-backend.api.ledger.com/v3',
+    };
+
+    const contextModule = new ContextModuleBuilder({
+      originToken: 'origin-token', // TODO: replace with your origin token
+    })
+      .addCalConfig(calConfig)
+      .addWeb3ChecksConfig(web3ChecksConfig)
+      .build();
+
     return new Observable((subscriber) => {
-      if (!self.sessionId) {
-        self.dmk.startDiscovering({ transport: self.transportType }).subscribe({
+      if (!this.sessionId) {
+        this.dmk.startDiscovering({ transport: this.transportType }).subscribe({
           next: (device) => {
             console.log('Device found:', device);
-            self.dmk.connect({ device }).then((sessionId) => {
-              const connectedDevice = self.dmk.getConnectedDevice({
+            this.dmk.connect({ device }).then((sessionId) => {
+              const connectedDevice = this.dmk.getConnectedDevice({
                 sessionId,
               });
               console.log('Connected device:', connectedDevice);
-              self.connectedDevice = connectedDevice;
+              this.connectedDevice = connectedDevice;
 
-              self.sessionId = sessionId;
-              self.ethSigner = new SignerEthBuilder({
-                dmk: self.dmk,
+              this.sessionId = sessionId;
+              this.ethSigner = new SignerEthBuilder({
+                dmk: this.dmk,
                 sessionId,
-              }).build();
-              subscriber.next(self.ethSigner);
+              })
+                .withContextModule(contextModule)
+                .build();
+              subscriber.next(this.ethSigner);
             });
           },
           error: (error) => {
@@ -171,7 +191,7 @@ export default class LedgerBridge {
           },
         });
       } else {
-        subscriber.next(self.ethSigner);
+        subscriber.next(this.ethSigner);
       }
     });
   }
@@ -212,7 +232,6 @@ export default class LedgerBridge {
 
   unlock(replyAction, hdPath, messageId, source) {
     console.log('unlock');
-    const self = this;
     this.makeApp().subscribe({
       next: (app) => {
         console.log('unlock', hdPath);
@@ -226,7 +245,7 @@ export default class LedgerBridge {
 
         observable.subscribe({
           next: (deviceActionState) => {
-            self.handleResponse(
+            this.handleResponse(
               deviceActionState,
               replyAction,
               messageId,
@@ -236,7 +255,7 @@ export default class LedgerBridge {
           },
           error: (error) => {
             console.error(error);
-            self.sendMessageToExtension(
+            this.sendMessageToExtension(
               {
                 action: replyAction,
                 success: false,
@@ -255,7 +274,6 @@ export default class LedgerBridge {
   }
 
   signTransaction(replyAction, hdPath, tx, messageId, source) {
-    const self = this;
     this.makeApp().subscribe({
       next: (app) => {
         console.log('signTransaction', hdPath, tx);
@@ -272,7 +290,7 @@ export default class LedgerBridge {
 
         observable.subscribe({
           next: (deviceActionState) => {
-            self.handleResponse(
+            this.handleResponse(
               deviceActionState,
               replyAction,
               messageId,
@@ -281,8 +299,8 @@ export default class LedgerBridge {
             );
           },
           error: (error) => {
-            self.error(error);
-            self.sendMessageToExtension(
+            this.error(error);
+            this.sendMessageToExtension(
               {
                 action: replyAction,
                 success: false,
@@ -301,18 +319,17 @@ export default class LedgerBridge {
   }
 
   signPersonalMessage(replyAction, hdPath, message, messageId, source) {
-    const self = this;
-    self.makeApp().subscribe({
+    this.makeApp().subscribe({
       next: (app) => {
         console.log('signPersonalMessage', hdPath, message);
         let clearText;
         // check the message is hex string or not
-        if (isHexaString(message)) {
-          // hexadecimal text to decode
-          clearText = hexToAscii(message.slice(2));
-        } else {
-          clearText = message;
-        }
+        // if (isHexaString(message)) {
+        // hexadecimal text to decode
+        clearText = hexToAscii(message);
+        // } else {
+        //   clearText = message;
+        // }
 
         console.log(`clear text is ${clearText}`);
         const { observable, cancel } = app.signMessage(
@@ -322,7 +339,7 @@ export default class LedgerBridge {
 
         observable.subscribe({
           next: (deviceActionState) => {
-            self.handleResponse(
+            this.handleResponse(
               deviceActionState,
               replyAction,
               messageId,
@@ -332,7 +349,7 @@ export default class LedgerBridge {
           },
           error: (error) => {
             console.error(error);
-            self.sendMessageToExtension(
+            this.sendMessageToExtension(
               {
                 action: replyAction,
                 success: false,
@@ -351,8 +368,7 @@ export default class LedgerBridge {
   }
 
   async signTypedData(replyAction, hdPath, message, messageId, source) {
-    const self = this;
-    self.makeApp().subscribe({
+    this.makeApp().subscribe({
       next: (app) => {
         console.log('signTypedData', hdPath, message);
 
@@ -363,7 +379,7 @@ export default class LedgerBridge {
 
         observable.subscribe({
           next: (deviceActionState) => {
-            self.handleResponse(
+            this.handleResponse(
               deviceActionState,
               replyAction,
               messageId,
@@ -373,7 +389,7 @@ export default class LedgerBridge {
           },
           error: (error) => {
             console.error(error);
-            self.sendMessageToExtension(
+            this.sendMessageToExtension(
               {
                 action: replyAction,
                 success: false,
@@ -384,7 +400,7 @@ export default class LedgerBridge {
             );
           },
           complete: () => {
-            console.log('signPersonalMessage completed');
+            console.log('signTypedData completed');
           },
         });
       },
@@ -449,20 +465,13 @@ export default class LedgerBridge {
     const isU2FError = (err) => !!err && !!err.metaData;
     const isStringError = (err) => typeof err === 'string';
     const isErrorWithId = (err) =>
-      err.hasOwnProperty('id') && err.hasOwnProperty('message');
+      Object.prototype.hasOwnProperty.call(err, 'id') &&
+      Object.prototype.hasOwnProperty.call(err, 'message');
     const isWrongAppError = (err) =>
       String(err.message || err).includes('6804');
-    const isLedgerLockedError = (err) =>
-      err.message && err.message.includes('OpenFailed');
+    const isLedgerLockedError = (err) => err.message?.includes('OpenFailed');
 
     // https://developers.yubico.com/U2F/Libraries/Client_error_codes.html
-    // if (isU2FError(err)) {
-    //   if (err.metaData.code ===  ) {
-    //     return new Error('LEDGER_TIMEOUT');
-    //   }
-    //   return err.metaData.type;
-    // }
-
     if (isWrongAppError(err)) {
       return new Error('LEDGER_WRONG_APP');
     }

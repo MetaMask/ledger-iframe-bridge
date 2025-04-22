@@ -42,6 +42,7 @@ export default function Home() {
 
     <div className="flex flex-col sm:flex-row gap-4">
       <button
+        type="button"
         onClick={handleUSBSelect}
         className="bg-white text-black px-6 py-3 rounded-full hover:bg-gray-200 transition-colors"
       >
@@ -49,6 +50,7 @@ export default function Home() {
       </button>
 
       <button
+        type="button"
         onClick={handleBLESelect}
         className="bg-white text-black px-6 py-3 rounded-full hover:bg-gray-200 transition-colors"
       >

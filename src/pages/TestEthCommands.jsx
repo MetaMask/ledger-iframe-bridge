@@ -21,7 +21,7 @@ export default function TestEthCommands() {
     } catch (error) {
       console.error(error);
     }
-  }, [])
+  }, [bridge])
 
   const handleSignPersonalMessage = useCallback(async () => {
     try {
@@ -32,7 +32,7 @@ export default function TestEthCommands() {
     } catch (error) {
       console.error(error);
     }
-  }, [])
+  }, [bridge])
   return (
     <div className="page-container">
       {bridge && (
@@ -40,18 +40,21 @@ export default function TestEthCommands() {
           <h2 className="text-2xl font-bold text-white mb-4">Test ETH Commands</h2>
           <div className="button-group">
             <button
+              type="button"
               disabled={isDisabled}
               onClick={() => handleSignTransaction()}
             >
               Test Sign Transaction
             </button>
             <button
+              type="button"
               disabled={isDisabled}
               onClick={() => handleSignPersonalMessage()}
             >
               Test Sign Personal Message
             </button>
             <button
+              type="button"
               disabled={isDisabled}
               onClick={() => console.log('Sign Typed Data V4 clicked')}
             >

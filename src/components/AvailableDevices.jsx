@@ -23,6 +23,7 @@ export default function AvailableDevices() {
       <h2 className="text-white text-sm mb-2 flex items-center gap-2">
         Available devices ({discoveredDevices.length})
         <button
+          type="button"
           onClick={() => setIsExpanded(!isExpanded)}
           className="text-gray-400 hover:text-white transition-colors"
         >
@@ -55,11 +56,12 @@ export default function AvailableDevices() {
                   <div>
                     <div className="text-white font-medium">{device.deviceModel.name}</div>
                     <div className="text-gray-400 text-sm">
-                      {device.transport == WEBHID ? 'USB' : 'Bluetooth'}
+                      {device.transport === WEBHID ? 'USB' : 'Bluetooth'}
                     </div>
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={handleConnect}
                   disabled={device.connected}
                   className="px-3 py-1 rounded-full bg-[#333333] text-white text-sm hover:bg-[#444444] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"

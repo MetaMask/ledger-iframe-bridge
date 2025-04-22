@@ -27,6 +27,7 @@ export default function DeviceSession() {
     <div>
       <h2 className="text-white text-sm mb-2">Device sessions (1)</h2>
       <button
+        type="button"
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full bg-[#2a2a2a] text-white rounded-lg p-3 flex items-center justify-between group hover:bg-[#333333] transition-colors"
       >
@@ -35,7 +36,7 @@ export default function DeviceSession() {
           <div>
             <div className="font-medium">{connectedDevice.name}</div>
             <div className="text-green-500 text-sm">
-              {state && state.deviceStatus} • {transportType}
+              {state?.deviceStatus} • {transportType}
             </div>
           </div>
         </div>
@@ -47,6 +48,7 @@ export default function DeviceSession() {
       {isExpanded && (
         <div className="mt-2 bg-[#2a2a2a] rounded-lg p-3">
           <button
+            type="button"
             onClick={async () => await bridge.disconnect()}
             className="text-red-400 hover:text-red-300 text-sm"
           >
