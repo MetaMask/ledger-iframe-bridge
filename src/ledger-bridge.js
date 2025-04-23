@@ -40,7 +40,7 @@ export default class LedgerBridge {
     window.addEventListener(
       'message',
       async (e) => {
-        if (e && e.data && e.data.target === 'LEDGER-IFRAME') {
+        if (e?.data && e.data.target === 'LEDGER-IFRAME') {
           const { action, params, messageId } = e.data;
           const replyAction = `${action}-reply`;
 
@@ -322,11 +322,11 @@ export default class LedgerBridge {
     this.makeApp().subscribe({
       next: (app) => {
         console.log('signPersonalMessage', hdPath, message);
-        let clearText;
+
         // check the message is hex string or not
         // if (isHexaString(message)) {
         // hexadecimal text to decode
-        clearText = hexToAscii(message);
+        const clearText = hexToAscii(message);
         // } else {
         //   clearText = message;
         // }

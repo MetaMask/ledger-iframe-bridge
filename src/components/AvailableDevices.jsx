@@ -6,9 +6,10 @@ import { LEDGER_LIVE_PATH, WEBHID } from '../ledger-bridge';
 
 export default function AvailableDevices() {
   const [isExpanded, setIsExpanded] = useState(true);
-  const { bridge, status } = useLedgerBridge();
+  const { bridge, status, connectedDevice, sessionId } = useLedgerBridge();
   const discoveredDevices = useAvailableDevices();
   const noDevice = discoveredDevices.length === 0;
+  const isConnected = status === 'Connected' && sessionId !== null;
 
   const handleConnect = async () => {
     try {
@@ -67,10 +68,10 @@ export default function AvailableDevices() {
                 <button
                   type="button"
                   onClick={handleConnect}
-                  disabled={device.connected}
-                  className={`px-4 py-2 rounded-full ${device.connected ? 'bg-[#333333] opacity-70' : device.transport === WEBHID ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700' : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'} text-white text-sm font-medium shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 ${device.transport === WEBHID ? 'focus:ring-blue-400' : 'focus:ring-green-400'} focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:scale-100`}
+                  disabled={device.connected || isConnected}
+                  className={`px-4 py-2 rounded-full ${device.connected || isConnected ? 'bg-[#333333] opacity-70' : device.transport === WEBHID ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700' : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'} text-white text-sm font-medium shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 ${device.transport === WEBHID ? 'focus:ring-blue-400' : 'focus:ring-green-400'} focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:scale-100`}
                 >
-                  {device.connected ? 'Connected' : 'Connect'}
+                  {device.connected ? 'Connected' : isConnected ? 'Another Device Connected' : 'Connect'}
                 </button>
               </div>
             ))
