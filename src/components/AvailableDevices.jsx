@@ -19,13 +19,13 @@ export default function AvailableDevices() {
   };
 
   return (
-    <div>
-      <h2 className="text-white text-sm mb-2 flex items-center gap-2">
+    <div className="w-full max-w-xl mx-auto">
+      <h2 className="text-white text-sm font-medium mb-3 px-1 flex items-center gap-2">
         Available devices ({discoveredDevices.length})
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="text-gray-400 hover:text-white transition-colors"
+          className="text-gray-400 hover:text-white transition-colors bg-[#333] h-5 w-5 rounded-full flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
         >
           <span className={`inline-block transform transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
             ▼
@@ -34,13 +34,15 @@ export default function AvailableDevices() {
       </h2>
 
       {isExpanded && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {noDevice ? (
-            <div className="bg-[#2a2a2a] rounded-lg p-3 flex items-center justify-between group hover:bg-[#333333] transition-colors">
-              <div className="flex items-center gap-3">
-                <span className="text-xl">📱</span>
+            <div className="bg-gradient-to-r from-[#2a2a2a] to-[#232323] rounded-xl p-4 flex items-center justify-between group hover:bg-[#333333] transition-all duration-300 shadow-lg border border-gray-800">
+              <div className="flex items-center gap-4">
+                <div className="bg-[#333] p-3 rounded-full flex items-center justify-center">
+                  <span className="text-2xl">📱</span>
+                </div>
                 <div>
-                  <div className="text-white font-medium">No device found</div>
+                  <div className="text-white font-medium text-lg">No device found</div>
                   <div className="text-gray-400 text-sm">Connect your Ledger device to continue</div>
                 </div>
               </div>
@@ -49,13 +51,15 @@ export default function AvailableDevices() {
             discoveredDevices.map((device) => (
               <div
                 key={device.id}
-                className="bg-[#2a2a2a] rounded-lg p-3 flex items-center justify-between group hover:bg-[#333333] transition-colors"
+                className="bg-gradient-to-r from-[#2a2a2a] to-[#232323] rounded-xl p-4 flex items-center justify-between group hover:bg-[#333333] transition-all duration-300 shadow-lg border border-gray-800"
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">📱</span>
+                <div className="flex items-center gap-4">
+                  <div className="bg-[#333] p-3 rounded-full flex items-center justify-center">
+                    <span className="text-2xl">📱</span>
+                  </div>
                   <div>
-                    <div className="text-white font-medium">{device.deviceModel.name}</div>
-                    <div className="text-gray-400 text-sm">
+                    <div className="text-white font-medium text-lg">{device.deviceModel.name}</div>
+                    <div className="text-gray-400 text-sm font-medium">
                       {device.transport === WEBHID ? 'USB' : 'Bluetooth'}
                     </div>
                   </div>
@@ -64,7 +68,7 @@ export default function AvailableDevices() {
                   type="button"
                   onClick={handleConnect}
                   disabled={device.connected}
-                  className="px-3 py-1 rounded-full bg-[#333333] text-white text-sm hover:bg-[#444444] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`px-4 py-2 rounded-full ${device.connected ? 'bg-[#333333] opacity-70' : device.transport === WEBHID ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700' : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'} text-white text-sm font-medium shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 ${device.transport === WEBHID ? 'focus:ring-blue-400' : 'focus:ring-green-400'} focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:scale-100`}
                 >
                   {device.connected ? 'Connected' : 'Connect'}
                 </button>

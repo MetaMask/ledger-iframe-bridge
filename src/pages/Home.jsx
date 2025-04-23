@@ -1,6 +1,8 @@
 import React from 'react';
 import { useLedgerBridge } from '../providers/LedgerBridgeProvider';
 import { WEBHID, BLE, LEDGER_LIVE_PATH } from '../ledger-bridge';
+import AvailableDevices from '../components/AvailableDevices';
+import DeviceSession from '../components/DeviceSession';
 
 export default function Home() {
   const { bridge } = useLedgerBridge();
@@ -22,29 +24,29 @@ export default function Home() {
   };
 
   return (
-    <main className="flex-1 flex flex-col items-center justify-center p-4">
+    <main className="flex-1 flex flex-col items-center justify-center p-6 bg-[#1a1a1a]">
     {/* Image placeholder - replace with actual image path */}
-    <div className="mb-8">
+    <div className="mb-10 transform hover:scale-105 transition-transform duration-300">
       <img
         src="/ledger-devices.png"
         alt="Ledger Devices"
-        className="max-w-md mx-auto"
+        className="max-w-md mx-auto drop-shadow-xl"
       />
     </div>
 
-    <h1 className="text-4xl font-bold mb-4 text-center text-white">
-      Metamask Ledger Bridge
+    <h1 className="text-4xl font-bold mb-8 text-center text-white tracking-tight">
+      <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-green-400">Metamask Ledger Bridge</span>
     </h1>
 
-    <p className="text-gray-400 mb-8 text-center">
-      Use this application to test Ledger hardware device features.
-    </p>
+    <div className="flex flex-col w-full max-w-xl mx-auto mb-6">
+      <DeviceSession />
+    </div>
 
-    <div className="flex flex-col sm:flex-row gap-4">
+    <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xl mx-auto mb-6">
       <button
         type="button"
         onClick={handleUSBSelect}
-        className="bg-white text-black px-6 py-3 rounded-full hover:bg-gray-200 transition-colors"
+        className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium px-6 py-3 rounded-full hover:from-blue-600 hover:to-blue-700 transition-all duration-300 w-full text-center sm:max-w-none shadow-lg transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
       >
         Select a USB device
       </button>
@@ -52,10 +54,14 @@ export default function Home() {
       <button
         type="button"
         onClick={handleBLESelect}
-        className="bg-white text-black px-6 py-3 rounded-full hover:bg-gray-200 transition-colors"
+        className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white font-medium px-6 py-3 rounded-full hover:from-green-600 hover:to-green-700 transition-all duration-300 w-full text-center sm:max-w-none shadow-lg transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50"
       >
         Select a BLE device
       </button>
+    </div>
+
+    <div className="flex flex-col w-full max-w-xl mx-auto">
+      <AvailableDevices />
     </div>
 
   </main>
