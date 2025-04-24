@@ -3,13 +3,13 @@ import {
   DeviceManagementKitBuilder,
   DeviceActionStatus,
   hexaStringToBuffer,
-  isHexaString,
 } from '@ledgerhq/device-management-kit';
 import { SignerEthBuilder } from '@ledgerhq/device-signer-kit-ethereum';
 import { webHidTransportFactory } from '@ledgerhq/device-transport-kit-web-hid';
 import { webBleTransportFactory } from '@ledgerhq/device-transport-kit-web-ble';
 import { Observable } from 'rxjs';
 import { hexToAscii } from './utils/HexUtils';
+import { DeviceStatus } from '@ledgerhq/device-management-kit';
 
 export const WEBHID = 'WEB-HID';
 export const BLE = 'WEB-BLE';
@@ -24,6 +24,11 @@ export default class LedgerBridge {
   dmk;
   connectedDevice;
   ethSigner;
+  deviceStatus;
+  actionState = 'None';
+  interval;
+
+  source;
 
   constructor() {
     this.dmk = new DeviceManagementKitBuilder()
@@ -37,19 +42,35 @@ export default class LedgerBridge {
   }
 
   addEventListeners() {
+    // Listen for window close events
+    window.addEventListener('beforeunload', async () => {
+      console.log('Window is closing, cleaning up Ledger Bridge');
+      // broadcast message to close screen.
+      this.sendMessageToExtension(
+        {
+          action: 'ledger-bridge-close',
+          success: true,
+        },
+        this.source,
+      );
+      await this.close();
+    });
+
     window.addEventListener(
       'message',
       async (e) => {
         if (e?.data && e.data.target === 'LEDGER-IFRAME') {
           const { action, params, messageId } = e.data;
           const replyAction = `${action}-reply`;
+          this.source = e.source;
+
+          console.log('Message received:', e.data);
 
           switch (action) {
             case 'ledger-unlock':
               this.unlock(replyAction, params.hdPath, messageId, e.source);
               break;
             case 'ledger-sign-transaction':
-              console.log('ledger-sign-transaction', params);
               this.signTransaction(
                 replyAction,
                 params.hdPath,
@@ -67,7 +88,7 @@ export default class LedgerBridge {
                 e.source,
               );
               break;
-            case 'ledger-close-bridge':
+            case 'ledger-bridge-close':
               this.cleanUp(replyAction, messageId);
               break;
             case 'ledger-update-transport':
@@ -108,13 +129,14 @@ export default class LedgerBridge {
 
   sendMessageToExtension(msg, source) {
     if (!source) return;
+    this.subscribe = undefined;
     source.postMessage(msg, '*');
   }
 
   async attemptMakeApp(replyAction, messageId, source) {
     console.log('attemptMakeApp');
     try {
-      await this.makeApp({ openOnly: true });
+      await this.makeApp();
       this.sendMessageToExtension(
         {
           action: replyAction,
@@ -136,11 +158,27 @@ export default class LedgerBridge {
     }
   }
 
-  makeApp(config = {}) {
+  makeApp(callback) {
     console.log('makeApp');
     if (!this.transportType) {
       this.transportType = WEBHID;
     }
+
+    if (!this.sessionId) {
+      try {
+        this.actionState = 'Wait for connection';
+        // this.createConnection();
+        this.#setupInterval(callback);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    } else {
+      callback();
+    }
+  }
+
+  createConnection() {
+    console.log('createConnection');
 
     const calConfig = {
       url: 'https://crypto-assets-service.api.ledger.com/v1',
@@ -159,40 +197,66 @@ export default class LedgerBridge {
       .addWeb3ChecksConfig(web3ChecksConfig)
       .build();
 
-    return new Observable((subscriber) => {
-      if (!this.sessionId) {
-        this.dmk.startDiscovering({ transport: this.transportType }).subscribe({
-          next: (device) => {
-            console.log('Device found:', device);
-            this.dmk.connect({ device }).then((sessionId) => {
-              const connectedDevice = this.dmk.getConnectedDevice({
-                sessionId,
-              });
-              console.log('Connected device:', connectedDevice);
-              this.connectedDevice = connectedDevice;
+    this.dmk.startDiscovering({ transport: this.transportType }).subscribe({
+      next: (device) => {
+        this.dmk.connect({ device }).then((sessionId) => {
+          const connectedDevice = this.dmk.getConnectedDevice({
+            sessionId,
+          });
+          this.connectedDevice = connectedDevice;
 
-              this.sessionId = sessionId;
-              this.ethSigner = new SignerEthBuilder({
-                dmk: this.dmk,
-                sessionId,
-              })
-                .withContextModule(contextModule)
-                .build();
-              subscriber.next(this.ethSigner);
-            });
-          },
-          error: (error) => {
-            console.error('Error:', error);
-            subscriber.error(error);
-          },
-          complete: () => {
-            console.log('Discovery complete');
-            subscriber.complete();
-          },
+          this.sessionId = sessionId;
+          this.ethSigner = new SignerEthBuilder({
+            dmk: this.dmk,
+            sessionId,
+          })
+            .withContextModule(contextModule)
+            .build();
+
+          // // setup subscription for device status
+          this.#setupDeviceStatusSubscription();
         });
-      } else {
-        subscriber.next(this.ethSigner);
+      },
+      error: (error) => {
+        console.error('Error:', error);
+        throw error;
+      },
+      complete: () => {
+        console.log('Discovery complete');
+      },
+    });
+  }
+
+  #setupInterval(callback) {
+    this.interval = setInterval(() => {
+      if (this.deviceStatus === DeviceStatus.LOCKED) {
+        this.actionState = 'Wait for Unlock';
       }
+      if (this.deviceStatus === DeviceStatus.CONNECTED) {
+        callback();
+        this.#clearInterval();
+      }
+    }, 500);
+  }
+
+  #clearInterval() {
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = null;
+    }
+  }
+
+  #setupDeviceStatusSubscription() {
+    this.dmk.getDeviceSessionState({ sessionId: this.sessionId }).subscribe({
+      next: (state) => {
+        this.deviceStatus = state.deviceStatus;
+      },
+      error: (error) => {
+        console.error('Error:', error);
+      },
+      complete: () => {
+        console.log('Device session state subscription completed');
+      },
     });
   }
 
@@ -231,179 +295,175 @@ export default class LedgerBridge {
   }
 
   unlock(replyAction, hdPath, messageId, source) {
-    console.log('unlock');
-    this.makeApp().subscribe({
-      next: (app) => {
-        console.log('unlock', hdPath);
-        const { observable, cancel } = app.getAddress(
-          hdPath.replace('m/', ''),
-          {
-            checkOnDevice: false,
-            returnChainCode: false,
-          },
-        );
+    console.log('unlock', hdPath);
+    this.makeApp(() => {
+      this.actionState = 'Unlock';
+      const { observable, cancel } = this.ethSigner.getAddress(
+        hdPath.replace('m/', ''),
+        {
+          checkOnDevice: false,
+          returnChainCode: false,
+        },
+      );
 
-        observable.subscribe({
-          next: (deviceActionState) => {
-            this.handleResponse(
-              deviceActionState,
-              replyAction,
+      observable.subscribe({
+        next: (deviceActionState) => {
+          this.handleResponse(
+            deviceActionState,
+            replyAction,
+            messageId,
+            'unlock',
+            source,
+          );
+        },
+        error: (error) => {
+          console.error(error);
+          this.sendMessageToExtension(
+            {
+              action: replyAction,
+              success: false,
+              payload: { error: error },
               messageId,
-              'unlock',
-              source,
-            );
-          },
-          error: (error) => {
-            console.error(error);
-            this.sendMessageToExtension(
-              {
-                action: replyAction,
-                success: false,
-                payload: { error: error },
-                messageId,
-              },
-              source,
-            );
-          },
-          complete: () => {
-            console.log('unlock completed');
-          },
-        });
-      },
+            },
+            source,
+          );
+        },
+        complete: () => {
+          console.log('unlock completed');
+        },
+      });
     });
   }
 
   signTransaction(replyAction, hdPath, tx, messageId, source) {
-    this.makeApp().subscribe({
-      next: (app) => {
-        console.log('signTransaction', hdPath, tx);
+    console.log('signTransaction', hdPath, tx);
+    this.makeApp(() => {
+      this.actionState = 'sign Transaction';
+      console.log('signTransaction', hdPath, tx);
 
-        const transaction = hexaStringToBuffer(tx);
+      const transaction = hexaStringToBuffer(tx);
 
-        const { observable, cancel } = app.signTransaction(
-          hdPath.replace('m/', ''),
-          transaction,
-          {
-            domain: 'localhost',
-          },
-        );
+      const { observable, cancel } = this.ethSigner.signTransaction(
+        hdPath.replace('m/', ''),
+        transaction,
+        {
+          domain: 'localhost',
+        },
+      );
 
-        observable.subscribe({
-          next: (deviceActionState) => {
-            this.handleResponse(
-              deviceActionState,
-              replyAction,
+      observable.subscribe({
+        next: (deviceActionState) => {
+          this.handleResponse(
+            deviceActionState,
+            replyAction,
+            messageId,
+            'signTransaction',
+            source,
+          );
+        },
+        error: (error) => {
+          this.error(error);
+          this.sendMessageToExtension(
+            {
+              action: replyAction,
+              success: false,
+              payload: { error: error },
               messageId,
-              'signTransaction',
-              source,
-            );
-          },
-          error: (error) => {
-            this.error(error);
-            this.sendMessageToExtension(
-              {
-                action: replyAction,
-                success: false,
-                payload: { error: error },
-                messageId,
-              },
-              source,
-            );
-          },
-          complete: () => {
-            console.log('signTransaction completed');
-          },
-        });
-      },
+            },
+            source,
+          );
+        },
+        complete: () => {
+          console.log('signTransaction completed');
+        },
+      });
     });
   }
 
   signPersonalMessage(replyAction, hdPath, message, messageId, source) {
-    this.makeApp().subscribe({
-      next: (app) => {
-        console.log('signPersonalMessage', hdPath, message);
+    console.log('signPersonalMessage', hdPath, message);
+    this.makeApp(() => {
+      this.actionState = 'sign Personal Message';
 
-        // check the message is hex string or not
-        // if (isHexaString(message)) {
-        // hexadecimal text to decode
-        const clearText = hexToAscii(message);
-        // } else {
-        //   clearText = message;
-        // }
+      // check the message is hex string or not
+      // if (isHexaString(message)) {
+      // hexadecimal text to decode
+      const clearText = hexToAscii(message);
+      // } else {
+      //   clearText = message;
+      // }
 
-        console.log(`clear text is ${clearText}`);
-        const { observable, cancel } = app.signMessage(
-          hdPath.replace('m/', ''),
-          clearText,
-        );
+      console.log(`clear text is ${clearText}`);
+      const { observable, cancel } = this.ethSigner.signMessage(
+        hdPath.replace('m/', ''),
+        clearText,
+      );
 
-        observable.subscribe({
-          next: (deviceActionState) => {
-            this.handleResponse(
-              deviceActionState,
-              replyAction,
+      observable.subscribe({
+        next: (deviceActionState) => {
+          this.handleResponse(
+            deviceActionState,
+            replyAction,
+            messageId,
+            'signPersonalMessage',
+            source,
+          );
+        },
+        error: (error) => {
+          console.error(error);
+          this.sendMessageToExtension(
+            {
+              action: replyAction,
+              success: false,
+              payload: { error: error },
               messageId,
-              'signPersonalMessage',
-              source,
-            );
-          },
-          error: (error) => {
-            console.error(error);
-            this.sendMessageToExtension(
-              {
-                action: replyAction,
-                success: false,
-                payload: { error: error },
-                messageId,
-              },
-              source,
-            );
-          },
-          complete: () => {
-            console.log('signPersonalMessage completed');
-          },
-        });
-      },
+            },
+            source,
+          );
+        },
+        complete: () => {
+          console.log('signPersonalMessage completed');
+        },
+      });
     });
   }
 
   async signTypedData(replyAction, hdPath, message, messageId, source) {
-    this.makeApp().subscribe({
-      next: (app) => {
-        console.log('signTypedData', hdPath, message);
+    console.log('signTypedData', hdPath, message);
+    this.makeApp(() => {
+      this.actionState = 'sign Typed Data';
 
-        const { observable, cancel } = app.signTypedData(
-          hdPath.replace('m/', ''),
-          message,
-        );
+      const { observable, cancel } = this.ethSigner.signTypedData(
+        hdPath.replace('m/', ''),
+        message,
+      );
 
-        observable.subscribe({
-          next: (deviceActionState) => {
-            this.handleResponse(
-              deviceActionState,
-              replyAction,
+      observable.subscribe({
+        next: (deviceActionState) => {
+          this.handleResponse(
+            deviceActionState,
+            replyAction,
+            messageId,
+            'signTypedData',
+            source,
+          );
+        },
+        error: (error) => {
+          console.error(error);
+          this.sendMessageToExtension(
+            {
+              action: replyAction,
+              success: false,
+              payload: { error: error },
               messageId,
-              'signTypedData',
-              source,
-            );
-          },
-          error: (error) => {
-            console.error(error);
-            this.sendMessageToExtension(
-              {
-                action: replyAction,
-                success: false,
-                payload: { error: error },
-                messageId,
-              },
-              source,
-            );
-          },
-          complete: () => {
-            console.log('signTypedData completed');
-          },
-        });
-      },
+            },
+            source,
+          );
+        },
+        complete: () => {
+          console.log('signTypedData completed');
+        },
+      });
     });
   }
 
@@ -414,6 +474,9 @@ export default class LedgerBridge {
     this.sessionId = undefined;
     this.connectedDevice = undefined;
     this.ethSigner = undefined;
+    this.actionState = 'None';
+    this.source = undefined;
+    this.deviceStatus = undefined;
   }
 
   async close() {
@@ -427,6 +490,7 @@ export default class LedgerBridge {
     console.warn(deviceActionState);
 
     if (deviceActionState.status === DeviceActionStatus.Completed) {
+      this.actionState = 'none';
       const output = deviceActionState.output;
       console.log('output is', output);
       const result = output;
@@ -449,6 +513,7 @@ export default class LedgerBridge {
         source,
       );
     } else if (deviceActionState.status === DeviceActionStatus.Error) {
+      this.actionState = 'none';
       this.sendMessageToExtension(
         {
           action: replyAction,

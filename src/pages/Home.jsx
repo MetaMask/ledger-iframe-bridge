@@ -3,6 +3,7 @@ import { useLedgerBridge } from '../providers/LedgerBridgeProvider';
 import { WEBHID, BLE, LEDGER_LIVE_PATH } from '../ledger-bridge';
 import AvailableDevices from '../components/AvailableDevices';
 import DeviceSession from '../components/DeviceSession';
+import ActionNotificationBox from '../components/ActionNotificationBox';
 
 export default function Home() {
   const { bridge, status, connectedDevice, sessionId } = useLedgerBridge();
@@ -11,17 +12,17 @@ export default function Home() {
   const handleUSBSelect = () => {
     console.log('USB device selection clicked');
     bridge.updateTransportTypePreference(
-      'test-usb',WEBHID, 'messageId'
+      'test-usb', WEBHID, 'messageId'
     );
-    bridge.unlock('test-usb-connect', LEDGER_LIVE_PATH, 'messageId');
+    bridge.createConnection();
   };
 
   const handleBLESelect = () => {
     console.log('BLE device selection clicked');
     bridge.updateTransportTypePreference(
-      'test-ble',BLE, 'messageId'
+      'test-ble', BLE, 'messageId'
     );
-    bridge.unlock('test-ble-connect', LEDGER_LIVE_PATH, 'messageId');
+    bridge.createConnection();
   };
 
   return (
@@ -64,7 +65,11 @@ export default function Home() {
     </div>
 
     <div className="flex flex-col w-full max-w-xl mx-auto">
-      <AvailableDevices />
+      {isConnected ? (
+        <ActionNotificationBox />
+      ) : (
+        <AvailableDevices />
+      )}
     </div>
 
   </main>

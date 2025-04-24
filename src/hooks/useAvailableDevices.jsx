@@ -7,12 +7,9 @@ export default function useAvailableDevices(){
 
   const subscription = useRef(null);
   useEffect(() => {
-    console.log('dmk is', dmk);
     if (!dmk) return;
     if (!subscription.current) {
-      console.log('subscription is not current, making new subscription');
       subscription.current = dmk.listenToAvailableDevices({}).subscribe((devices) => {
-        console.log('devices is', devices);
         setDiscoveredDevices(devices);
       });
     }

@@ -19,7 +19,8 @@ export const LedgerBridgeProvider = ({ children }) => {
   const [connectedDevice, setConnectedDevice] = useState(null);
   const [dmk, setDmk] = useState(null);
   const [sessionId, setSessionId] = useState(null);
-
+  const [deviceStatus, setDeviceStatus] = useState(null);
+  const [actionState, setActionState] = useState(null);
   useEffect(() => {
     const bridge = initializeLedgerBridge();
     setLedgerBridge(bridge);
@@ -33,7 +34,8 @@ export const LedgerBridgeProvider = ({ children }) => {
     setConnectedDevice(connectedDevice);
     setStatus(status);
     setTransportType(transportType);
-
+    setDeviceStatus(bridge?.deviceStatus);
+    setActionState(bridge?.actionState);
     const timer = setInterval(() => {
       //reset ledger bridge
       const bridge = getLedgerBridge();
@@ -48,6 +50,8 @@ export const LedgerBridgeProvider = ({ children }) => {
       setConnectedDevice(connectedDevice);
       setStatus(status);
       setTransportType(transportType);
+      setDeviceStatus(bridge?.deviceStatus);
+      setActionState(bridge?.actionState);
     }, 2000);
 
     return () => {
@@ -69,6 +73,8 @@ export const LedgerBridgeProvider = ({ children }) => {
       connectedDevice,
       dmk,
       sessionId,
+      deviceStatus,
+      actionState,
     } }>
       {children}
     </LedgerBridgeContext.Provider>

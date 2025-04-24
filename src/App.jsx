@@ -12,9 +12,8 @@ export default function App() {
 }
 
 function MainAppContent() {
-  const { bridge, status, transportType } = useLedgerBridge();
+  const { bridge } = useLedgerBridge();
 
-  console.log(`bridge is ${bridge}, state is ${status}, transport type is ${transportType}`); // this is the bridge (bridge)
   const handleUSBSelect = () => {
     console.log('USB device selection clicked');
     console.log(bridge);
