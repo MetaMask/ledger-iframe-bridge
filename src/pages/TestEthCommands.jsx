@@ -33,6 +33,55 @@ export default function TestEthCommands() {
       console.error(error);
     }
   }, [bridge])
+
+  const handleSignTypedData = useCallback(async () => {
+    try {
+      const hdPath = LEDGER_LIVE_PATH;
+
+      // EIP-712 typed data v4 structure
+      const typedData = {
+        types: {
+          EIP712Domain: [
+            { name: 'name', type: 'string' },
+            { name: 'version', type: 'string' },
+            { name: 'chainId', type: 'uint256' },
+            { name: 'verifyingContract', type: 'address' }
+          ],
+          Person: [
+            { name: 'name', type: 'string' },
+            { name: 'wallet', type: 'address' }
+          ],
+          Mail: [
+            { name: 'from', type: 'Person' },
+            { name: 'to', type: 'Person' },
+            { name: 'contents', type: 'string' }
+          ]
+        },
+        primaryType: 'Mail',
+        domain: {
+          name: 'Ledger DMK Test',
+          version: '1',
+          chainId: 1,
+          verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC'
+        },
+        message: {
+          from: {
+            name: 'Alice',
+            wallet: '0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826'
+          },
+          to: {
+            name: 'Bob',
+            wallet: '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB'
+          },
+          contents: 'Hello, this is a test of DMK Sign Typed Data V4!'
+        }
+      };
+
+      await bridge.signTypedData("test-sign-typed-data", hdPath, typedData, "test", undefined);
+    } catch (error) {
+      console.error(error);
+    }
+  }, [bridge])
   return (
     <div className="page-container">
       {bridge && (
@@ -56,7 +105,7 @@ export default function TestEthCommands() {
             <button
               type="button"
               disabled={isDisabled}
-              onClick={() => console.log('Sign Typed Data V4 clicked')}
+              onClick={() => handleSignTypedData()}
             >
               Test Sign Typed Data V4
             </button>
