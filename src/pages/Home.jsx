@@ -51,7 +51,7 @@ export default function Home() {
         disabled={isConnected}
         className={`flex-1 bg-gradient-to-r ${isConnected ? 'from-gray-500 to-gray-600' : 'from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'} text-white font-medium px-6 py-3 rounded-full transition-all duration-300 w-full text-center sm:max-w-none shadow-lg transform ${isConnected ? '' : 'hover:scale-105'} focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed`}
       >
-        Select a USB device
+        Connect USB
       </button>
 
       <button
@@ -60,7 +60,7 @@ export default function Home() {
         disabled={isConnected}
         className={`flex-1 bg-gradient-to-r ${isConnected ? 'from-gray-500 to-gray-600' : 'from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'} text-white font-medium px-6 py-3 rounded-full transition-all duration-300 w-full text-center sm:max-w-none shadow-lg transform ${isConnected ? '' : 'hover:scale-105'} focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed`}
       >
-        Select a BLE device
+        Connect Bluetooth
       </button>
     </div>
 

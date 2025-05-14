@@ -13,7 +13,7 @@ export default function AvailableDevices() {
 
   const handleConnect = async () => {
     try {
-      await bridge.unlock('connect', LEDGER_LIVE_PATH , 'messageId');
+      await bridge.createConnection()
     } catch (error) {
       console.error('Failed to connect:', error);
     }
