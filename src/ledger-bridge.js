@@ -60,13 +60,27 @@ export default class LedgerBridge {
       'message',
       async (e) => {
         if (e?.data && e.data.target === 'LEDGER-IFRAME') {
-          const { action, params, messageId } = e.data;
+          const { action, params, messageId, payload } = e.data;
           const replyAction = `${action}-reply`;
           this.source = e.source;
 
           console.log('Message received:', e.data);
 
+          // Adding this to preserve original code structure
+
           switch (action) {
+            case 'heartbeat-check':
+              console.log('heartbeat-check');
+              this.sendMessageToExtension(
+                {
+                  action: replyAction,
+                  success: true,
+                  payload: { online: true },
+                  messageId,
+                },
+                e.source,
+              );
+              break;
             case 'ledger-unlock':
               this.unlock(replyAction, params.hdPath, messageId, e.source);
               break;
@@ -117,6 +131,17 @@ export default class LedgerBridge {
                 params.hdPath,
                 params.message,
                 messageId,
+                e.source,
+              );
+              break;
+            case 'heartbeat':
+              this.sendMessageToExtension(
+                {
+                  action: replyAction,
+                  success: true,
+                  payload: { online: true },
+                  messageId,
+                },
                 e.source,
               );
               break;
