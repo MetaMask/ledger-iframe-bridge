@@ -1,11 +1,13 @@
 import React, { useCallback } from 'react';
 import { useLedgerBridge } from '../providers/LedgerBridgeProvider';
 import { useDeviceSessionState } from '../hooks/useDeviceSessionState';
+import { useTranslation } from 'react-i18next';
 import './TestEthCommands.css';
 import { DeviceStatus } from '@ledgerhq/device-management-kit';
 import { LEDGER_LIVE_PATH } from '../ledger-bridge';
 
 export default function TestEthCommands() {
+  const { t } = useTranslation();
   const { bridge, sessionId } = useLedgerBridge();
   const state = useDeviceSessionState(sessionId);
 
@@ -86,28 +88,28 @@ export default function TestEthCommands() {
     <div className="page-container">
       {bridge && (
         <>
-          <h2 className="text-2xl font-bold text-white mb-4">Test ETH Commands</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">{t('menu.testEthCommands')}</h2>
           <div className="button-group">
             <button
               type="button"
               disabled={isDisabled}
               onClick={() => handleSignTransaction()}
             >
-              Test Sign Transaction
+              {t('ethCommands.signTransaction')}
             </button>
             <button
               type="button"
               disabled={isDisabled}
               onClick={() => handleSignPersonalMessage()}
             >
-              Test Sign Personal Message
+              {t('ethCommands.signPersonalMessage')}
             </button>
             <button
               type="button"
               disabled={isDisabled}
               onClick={() => handleSignTypedData()}
             >
-              Test Sign Typed Data V4
+              {t('ethCommands.signTypedData')}
             </button>
           </div>
         </>

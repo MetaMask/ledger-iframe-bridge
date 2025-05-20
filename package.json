@@ -1,5 +1,5 @@
 {
-  "name": "@metamask/ledger-iframe-bridge",
+  "name": "@metamask/ledger-app",
   "version": "0.0.0",
   "description": "",
   "license": "ISC",
@@ -14,9 +14,13 @@
     "lint:dependencies": "depcheck",
     "lint:eslint": "eslint .",
     "lint:misc": "prettier --check .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "i18n:extract": "echo 'Extracting strings for translation...' && node scripts/extract-messages.js",
+    "i18n:upload": "crowdin upload sources",
+    "i18n:download": "crowdin download"
   },
   "devDependencies": {
+    "@crowdin/cli": "^3.18.0",
     "@metamask/eslint-config": "^11.0.1",
     "@metamask/eslint-config-nodejs": "^11.0.0",
     "@vitejs/plugin-legacy": "^5.4.2",
@@ -54,8 +58,12 @@
     "@types/react-dom": "^18.2.18",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "i18next": "^25.2.0",
+    "i18next-browser-languagedetector": "^8.1.0",
+    "i18next-http-backend": "^3.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-i18next": "^15.5.1",
     "react-router-dom": "^7.1.5",
     "rxjs": "^7.8.1",
     "tailwind-merge": "^2.0.0"

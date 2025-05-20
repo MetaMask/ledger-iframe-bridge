@@ -1,0 +1,54 @@
+{
+  "app": {
+    "title": "Metamask Ledger 应用",
+    "footer": "Metamask Ledger 应用"
+  },
+  "menu": {
+    "home": "首页",
+    "testEthCommands": "测试 ETH 命令"
+  },
+  "deviceSession": {
+    "title": "设备会话"
+  },
+  "availableDevices": {
+    "title": "可用设备",
+    "usb": "USB",
+    "bluetooth": "蓝牙",
+    "noDevices": "没有可用设备"
+  },
+  "sidebar": {
+    "menu": "菜单"
+  },
+  "buttons": {
+    "connect": "连接",
+    "disconnect": "断开连接",
+    "connected": "已连接",
+    "continue": "继续",
+    "cancel": "取消",
+    "save": "保存",
+    "close": "关闭"
+  },
+  "connectOptions": {
+    "usb": "连接 USB",
+    "bluetooth": "连接蓝牙",
+    "anotherConnected": "另一个设备已连接"
+  },
+  "common": {
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "notAvailable": "不可用"
+  },
+  "ethCommands": {
+    "signTransaction": "测试签署交易",
+    "signPersonalMessage": "测试签署个人消息",
+    "signTypedData": "测试签署类型数据 V4"
+  },
+  "actionStatus": {
+    "deviceStatus": "设备状态",
+    "currentAction": "当前操作",
+    "sessionId": "会话 ID",
+    "processing": "处理中...",
+    "waiting": "等待操作"
+  }
+}

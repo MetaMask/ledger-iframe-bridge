@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useLedgerBridge } from '../providers/LedgerBridgeProvider';
-import {useDeviceSessionState} from '../hooks/useDeviceSessionState';
+import { useDeviceSessionState } from '../hooks/useDeviceSessionState';
+import { useTranslation } from 'react-i18next';
 
 export default function DeviceSession() {
+  const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
   const { bridge, transportType, connectedDevice, sessionId } = useLedgerBridge();
   const state = useDeviceSessionState(sessionId);
@@ -16,9 +18,9 @@ export default function DeviceSession() {
               <span className="text-2xl">📱</span>
             </div>
             <div>
-              <div className="font-medium text-lg">No selected device</div>
+              <div className="font-medium text-lg">{t('common.notAvailable')}</div>
               <div className="text-green-500 text-sm font-medium">
-                Not Connected • {transportType || 'USB'}
+                {t('buttons.disconnect')} • {transportType || t('availableDevices.usb')}
               </div>
             </div>
           </div>
@@ -29,7 +31,7 @@ export default function DeviceSession() {
 
   return (
     <div className="w-full max-w-xl mx-auto">
-      <h2 className="text-white text-sm font-medium mb-3 px-1">Device sessions (1)</h2>
+      <h2 className="text-white text-sm font-medium mb-3 px-1">{t('deviceSession.title')} (1)</h2>
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -62,7 +64,7 @@ export default function DeviceSession() {
               <title>Close icon</title>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
-            Disconnect
+            {t('buttons.disconnect')}
           </button>
         </div>
       )}

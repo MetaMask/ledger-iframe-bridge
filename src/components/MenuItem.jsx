@@ -2,9 +2,11 @@ import { useLedgerBridge } from '../providers/LedgerBridgeProvider';
 import { useNavigate } from 'react-router-dom';
 import { useDeviceSessionState } from '../hooks/useDeviceSessionState';
 import { DeviceStatus } from '@ledgerhq/device-management-kit';
+import { useTranslation } from 'react-i18next';
 import './MenuItem.css';
 
 export default function MenuItem({ icon, label, id }) {
+  const { t } = useTranslation();
   const { bridge, sessionId } = useLedgerBridge();
   const navigate = useNavigate();
   const state = useDeviceSessionState(sessionId);

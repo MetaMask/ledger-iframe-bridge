@@ -1,0 +1,73 @@
+.language-switcher {
+  position: relative;
+  display: inline-block;
+  width: 120px; /* Increased width */
+  margin: 8px 0;
+}
+
+.language-button {
+  padding: 8px 14px;
+  background-color: #2a2a2a;
+  color: #ffffff;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+
+.language-button:hover {
+  background-color: #333333;
+  border-color: #4a4a4a;
+}
+
+.language-button::after {
+  content: '▼';
+  font-size: 10px;
+  margin-left: 5px;
+  opacity: 0.7;
+}
+
+.language-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 120px; /* Ensure minimum width */
+  width: auto; /* Allow expansion based on content */
+  background-color: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  margin-top: 4px;
+  z-index: 10;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  overflow: hidden; /* Keep dropdown content within rounded borders */
+}
+
+.language-option {
+  padding: 8px 14px;
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
+.language-option:hover {
+  background-color: #3a3a3a;
+  transform: translateX(2px);
+}
+
+.language-option.active {
+  background-color: #424242;
+  font-weight: bold;
+  border-left: 3px solid #5e9eff;
+}

@@ -1,11 +1,12 @@
 // src/main.jsx
-import React from 'react';
+import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import App from './App.jsx';
 import Home from './pages/Home';
 import TestEthCommands from './pages/TestEthCommands';
 import { initializeLedgerBridge } from './bridge';
+import './i18n';
 
 initializeLedgerBridge();
 
@@ -28,6 +29,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <Suspense fallback="Loading...">
+      <RouterProvider router={router} />
+    </Suspense>
   </React.StrictMode>
 );

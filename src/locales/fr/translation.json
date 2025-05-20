@@ -1,0 +1,54 @@
+{
+  "app": {
+    "title": "Application Metamask Ledger",
+    "footer": "Application Metamask Ledger"
+  },
+  "menu": {
+    "home": "Accueil",
+    "testEthCommands": "Tester les Commandes ETH"
+  },
+  "deviceSession": {
+    "title": "Session d'appareil"
+  },
+  "availableDevices": {
+    "title": "Appareils disponibles",
+    "usb": "USB",
+    "bluetooth": "Bluetooth",
+    "noDevices": "Aucun appareil disponible"
+  },
+  "sidebar": {
+    "menu": "Menu"
+  },
+  "buttons": {
+    "connect": "Connecter",
+    "disconnect": "Déconnecter",
+    "connected": "Connecté",
+    "continue": "Continuer",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "close": "Fermer"
+  },
+  "connectOptions": {
+    "usb": "Connecter USB",
+    "bluetooth": "Connecter Bluetooth",
+    "anotherConnected": "Un autre appareil est connecté"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "notAvailable": "Non disponible"
+  },
+  "ethCommands": {
+    "signTransaction": "Tester la Signature de Transaction",
+    "signPersonalMessage": "Tester la Signature de Message Personnel",
+    "signTypedData": "Tester la Signature de Données Typées V4"
+  },
+  "actionStatus": {
+    "deviceStatus": "État de l'Appareil",
+    "currentAction": "Action Actuelle",
+    "sessionId": "ID de Session",
+    "processing": "Traitement en cours...",
+    "waiting": "En attente d'action"
+  }
+}

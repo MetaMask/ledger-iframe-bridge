@@ -1,0 +1,54 @@
+{
+  "app": {
+    "title": "Metamask Ledger App",
+    "footer": "Metamask Ledger App"
+  },
+  "menu": {
+    "home": "Home",
+    "testEthCommands": "Test ETH Commands"
+  },
+  "deviceSession": {
+    "title": "Device session"
+  },
+  "availableDevices": {
+    "title": "Available devices",
+    "usb": "USB",
+    "bluetooth": "Bluetooth",
+    "noDevices": "No devices available"
+  },
+  "sidebar": {
+    "menu": "Menu"
+  },
+  "buttons": {
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "connected": "Connected",
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close"
+  },
+  "connectOptions": {
+    "usb": "Connect USB",
+    "bluetooth": "Connect Bluetooth",
+    "anotherConnected": "Another Device Connected"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "notAvailable": "Not available"
+  },
+  "ethCommands": {
+    "signTransaction": "Test Sign Transaction",
+    "signPersonalMessage": "Test Sign Personal Message",
+    "signTypedData": "Test Sign Typed Data V4"
+  },
+  "actionStatus": {
+    "deviceStatus": "Device Status",
+    "currentAction": "Current Action",
+    "sessionId": "Session ID",
+    "processing": "Processing...",
+    "waiting": "Waiting for action"
+  }
+}

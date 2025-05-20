@@ -34,10 +34,9 @@ function MainAppContent() {
 
   return (
     <div className="flex h-screen bg-[#1a1a1a]">
-      {/* <Sidebar /> */}
+       {/* <Sidebar /> */}
 
       <div className="flex-1 overflow-auto">
-
         <Outlet />
       </div>
     </div>
