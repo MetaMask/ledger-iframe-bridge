@@ -11,6 +11,8 @@ export default function ActionNotificationBox() {
   const getDisplayStatus = useCallback(() => {
     // Map DMK device status to display status
     switch (deviceStatus) {
+      case DeviceStatus.BUSY:
+        return t('common.busy');
       case DeviceStatus.CONNECTED:
         return t('buttons.connected');
       case DeviceStatus.LOCKED:
@@ -53,6 +55,10 @@ export default function ActionNotificationBox() {
 
     // Map specific action states to translation keys
     switch (actionState) {
+      case 'getAccount':
+        return t('actions.getAccount');
+      case 'Wait for Unlock':
+        return t('actions.waitForUnlock');
       case 'sign Transaction':
         return t('actions.signTransaction');
       case 'sign Typed Data':

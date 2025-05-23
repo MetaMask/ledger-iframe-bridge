@@ -47,11 +47,12 @@
     "notAvailable": "暂不可用",
     "busy": "处理中",
     "disconnected": "已断开",
-    "locked": "已锁定",
-    "none": "无"
+    "locked": "已锁定"
   },
   "actions": {
     "none": "无操作",
+    "getAccount": "获取账户",
+    "waitForUnlock": "等待解锁",
     "signTransaction": "签名交易",
     "signTypedData": "签名类型化数据",
     "signPersonalMessage": "签名个人消息"
@@ -67,5 +68,10 @@
     "sessionId": "会话标识",
     "processing": "处理中...",
     "waiting": "等待操作中"
+  },
+  "messages": {
+    "connectDeviceWarning": "请连接您的 Ledger 设备以继续操作",
+    "unlockDeviceWarning": "请解锁您的 Ledger 设备并打开以太坊应用以继续",
+    "continueOperationWarning": "请在您的 Ledger 设备上继续操作"
   }
 }

@@ -1,15 +1,24 @@
 import React from 'react';
 import { WEBHID, BLE } from '../ledger-bridge';
+import { DeviceStatus } from '@ledgerhq/device-management-kit';
 import AvailableDevices from '../components/AvailableDevices';
 import DeviceSession from '../components/DeviceSession';
 import ActionNotificationBox from '../components/ActionNotificationBox';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import MessageBox from '../components/MessageBox';
 import { useTranslation } from 'react-i18next';
 import { useLedgerRedux } from '../hooks/useLedgerRedux';
 
 export default function Home() {
   const { t } = useTranslation();
-  const { bridge, status, connectedDevice, sessionId } = useLedgerRedux();
+  const {
+    bridge,
+    status,
+    connectedDevice,
+    sessionId,
+    deviceStatus,
+    actionState,
+  } = useLedgerRedux();
   const isConnected = status === 'Connected' && sessionId !== null;
 
   const handleUSBSelect = () => {
@@ -70,6 +79,37 @@ export default function Home() {
         <h1 className="text-3xl font-semibold text-white text-center mb-6">
           {t('app.connectLedger')}
         </h1>
+
+        {/* Warning Message - Show when device is not connected or locked */}
+        {(deviceStatus === DeviceStatus.NOT_CONNECTED || !deviceStatus) && (
+          <MessageBox
+            type="warning"
+            message={t('messages.connectDeviceWarning')}
+            show={true}
+            className="w-full mb-4"
+          />
+        )}
+
+        {deviceStatus === DeviceStatus.LOCKED && actionState != 'None' && (
+          <MessageBox
+            type="info"
+            message={t('messages.unlockDeviceWarning')}
+            show={true}
+            className="w-full mb-4"
+          />
+        )}
+
+        {actionState &&
+          actionState !== 'none' &&
+          actionState !== 'getAccount' &&
+          deviceStatus === DeviceStatus.BUSY && (
+            <MessageBox
+              type="info"
+              message={t('messages.continueOperationWarning')}
+              show={true}
+              className="w-full mb-4"
+            />
+          )}
 
         {/* Connect Buttons - Only show when not connected */}
         {!isConnected && (

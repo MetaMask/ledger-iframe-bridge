@@ -38,7 +38,7 @@ export default class LedgerBridge {
   connectedDevice;
   ethSigner;
   deviceStatus;
-  actionState = 'None';
+  actionState = 'none';
   interval;
 
   source;
@@ -209,9 +209,6 @@ export default class LedgerBridge {
 
     if (!this.sessionId) {
       try {
-        this.actionState = 'Wait for connection';
-        store.dispatch(setActionState(this.actionState));
-        // this.createConnection();
         this.#setupInterval(callback);
       } catch (error) {
         console.error('Error:', error);
@@ -390,7 +387,7 @@ export default class LedgerBridge {
   unlock(replyAction, hdPath, messageId, source) {
     console.log('unlock', hdPath);
     this.makeApp(() => {
-      this.actionState = 'Unlock';
+      this.actionState = 'getAccount';
       store.dispatch(setActionState(this.actionState));
       const { observable, cancel } = this.ethSigner.getAddress(
         hdPath.replace('m/', ''),
@@ -573,7 +570,7 @@ export default class LedgerBridge {
     this.sessionId = undefined;
     this.connectedDevice = undefined;
     this.ethSigner = undefined;
-    this.actionState = 'None';
+    this.actionState = 'none';
     this.source = undefined;
     this.deviceStatus = undefined;
 
@@ -586,7 +583,7 @@ export default class LedgerBridge {
     );
     store.dispatch(setConnectedDevice(null));
     store.dispatch(setSessionId(null));
-    store.dispatch(setActionState('None'));
+    store.dispatch(setActionState('none'));
     store.dispatch(setDeviceStatus(null));
     store.dispatch(setError(null));
   }
@@ -603,6 +600,7 @@ export default class LedgerBridge {
 
     if (deviceActionState.status === DeviceActionStatus.Completed) {
       this.actionState = 'none';
+      store.dispatch(setActionState(this.actionState));
       const output = deviceActionState.output;
       console.log('output is', output);
       const result = output;
@@ -626,6 +624,7 @@ export default class LedgerBridge {
       );
     } else if (deviceActionState.status === DeviceActionStatus.Error) {
       this.actionState = 'none';
+      store.dispatch(setActionState(this.actionState));
       this.sendMessageToExtension(
         {
           action: replyAction,

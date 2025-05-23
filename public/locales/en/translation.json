@@ -47,11 +47,12 @@
     "notAvailable": "Not available",
     "busy": "Busy",
     "locked": "Locked",
-    "disconnected": "Disconnected",
-    "none": "None"
+    "disconnected": "Disconnected"
   },
   "actions": {
     "none": "None",
+    "getAccount": "Get Account",
+    "waitForUnlock": "Wait for Unlock",
     "signTransaction": "Sign Transaction",
     "signTypedData": "Sign Typed Data",
     "signPersonalMessage": "Sign Personal Message"
@@ -67,5 +68,10 @@
     "sessionId": "Session ID",
     "processing": "Processing...",
     "waiting": "Waiting for action"
+  },
+  "messages": {
+    "connectDeviceWarning": "Please connect your Ledger device to continue your operation",
+    "unlockDeviceWarning": "Please unlock your Ledger and open Ethereum app to continue",
+    "continueOperationWarning": "Please continue your operations on your Ledger device"
   }
 }

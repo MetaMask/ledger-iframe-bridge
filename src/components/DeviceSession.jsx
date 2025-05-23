@@ -18,6 +18,8 @@ export default function DeviceSession() {
   const getDisplayStatus = () => {
     // Map DMK device status to display status
     switch (deviceStatus) {
+      case DeviceStatus.BUSY:
+        return t('common.busy');
       case DeviceStatus.CONNECTED:
         return t('buttons.connected');
       case DeviceStatus.LOCKED:
