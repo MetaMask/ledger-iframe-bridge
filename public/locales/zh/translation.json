@@ -1,0 +1,70 @@
+{
+  "app": {
+    "title": "MetaMask Ledger 应用",
+    "footer": "MetaMask Ledger 应用",
+    "connectLedger": "连接 Ledger 设备",
+    "helpText": "需要 MetaMask 连接帮助？",
+    "learnMore": "了解详情"
+  },
+  "menu": {
+    "home": "主页",
+    "testEthCommands": "ETH 命令测试"
+  },
+  "deviceSession": {
+    "title": "设备连接会话"
+  },
+  "availableDevices": {
+    "title": "可用设备",
+    "usb": "USB",
+    "bluetooth": "蓝牙",
+    "noDevices": "暂无可用设备",
+    "noDevicesFound": "未发现设备，请连接您的 Ledger 硬件钱包",
+    "viaUsb": "通过 USB 连接",
+    "viaBluetooth": "通过蓝牙连接",
+    "unavailable": "暂不可用"
+  },
+  "sidebar": {
+    "menu": "功能菜单"
+  },
+  "buttons": {
+    "connect": "连接",
+    "disconnect": "断开连接",
+    "connected": "已连接",
+    "continue": "继续",
+    "cancel": "取消",
+    "save": "保存",
+    "close": "关闭"
+  },
+  "connectOptions": {
+    "usb": "USB 连接",
+    "bluetooth": "蓝牙连接",
+    "anotherConnected": "其他设备已连接"
+  },
+  "common": {
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "notAvailable": "暂不可用",
+    "busy": "处理中",
+    "disconnected": "已断开",
+    "none": "无"
+  },
+  "actions": {
+    "none": "无操作",
+    "signTransaction": "签名交易",
+    "signTypedData": "签名类型化数据",
+    "signPersonalMessage": "签名个人消息"
+  },
+  "ethCommands": {
+    "signTransaction": "测试交易签名",
+    "signPersonalMessage": "测试个人消息签名",
+    "signTypedData": "测试类型化数据签名 V4"
+  },
+  "actionStatus": {
+    "deviceStatus": "设备状态",
+    "currentAction": "当前操作",
+    "sessionId": "会话标识",
+    "processing": "处理中...",
+    "waiting": "等待操作中"
+  }
+}

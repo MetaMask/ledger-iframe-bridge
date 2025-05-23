@@ -2,67 +2,120 @@ import { useState } from 'react';
 import { useLedgerBridge } from '../providers/LedgerBridgeProvider';
 import { useDeviceSessionState } from '../hooks/useDeviceSessionState';
 import { useTranslation } from 'react-i18next';
+import { DeviceStatus } from '@ledgerhq/device-management-kit';
 
 export default function DeviceSession() {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
-  const { bridge, transportType, connectedDevice, sessionId } = useLedgerBridge();
+  const {
+    bridge,
+    transportType,
+    connectedDevice,
+    sessionId,
+    actionState,
+    deviceStatus,
+  } = useLedgerBridge();
   const state = useDeviceSessionState(sessionId);
 
   if (!bridge || !connectedDevice) {
-    return (
-      <div className="w-full max-w-xl mx-auto">
-        <div className="w-full bg-gradient-to-r from-[#2a2a2a] to-[#232323] text-white rounded-xl p-4 flex items-center justify-between group hover:bg-[#333333] transition-all duration-300 shadow-lg border border-gray-800">
-          <div className="flex items-center gap-4">
-            <div className="bg-[#333] p-3 rounded-full flex items-center justify-center">
-              <span className="text-2xl">📱</span>
-            </div>
-            <div>
-              <div className="font-medium text-lg">{t('common.notAvailable')}</div>
-              <div className="text-green-500 text-sm font-medium">
-                {t('buttons.disconnect')} • {transportType || t('availableDevices.usb')}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
+  // Determine display status
+  const getDisplayStatus = () => {
+    // If there's an ongoing action that's not 'None', show as Busy
+    if (actionState && actionState !== 'None' && actionState !== 'none') {
+      return t('common.busy');
+    }
+
+    // Map DMK device status to display status
+    switch (deviceStatus) {
+      case DeviceStatus.CONNECTED:
+        return t('buttons.connected');
+      case DeviceStatus.LOCKED:
+        return t('common.busy');
+      case DeviceStatus.NOT_CONNECTED:
+        return t('common.disconnected');
+      default:
+        return t('buttons.connected');
+    }
+  };
+
+  const displayStatus = getDisplayStatus();
+  const transportDisplay =
+    transportType === 'USB'
+      ? t('availableDevices.viaUsb')
+      : t('availableDevices.viaBluetooth');
+
+  // Determine status text and color
+  const getStatusDisplay = () => {
+    if (displayStatus === t('common.busy')) {
+      return { text: t('common.busy'), color: 'text-amber-400' };
+    } else {
+      return {
+        text: `${t('buttons.connected')} ${transportDisplay}`,
+        color: 'text-green-400',
+      };
+    }
+  };
+
+  const statusDisplay = getStatusDisplay();
+
   return (
-    <div className="w-full max-w-xl mx-auto">
-      <h2 className="text-white text-sm font-medium mb-3 px-1">{t('deviceSession.title')} (1)</h2>
+    <div className="w-full">
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full bg-gradient-to-r from-[#2a2a2a] to-[#232323] text-white rounded-xl p-4 flex items-center justify-between group hover:bg-[#333333] transition-all duration-300 shadow-lg border border-gray-800 focus:outline-none"
+        className="w-full bg-[#2d3748] border border-[#4a5568] rounded-lg p-4 flex items-center justify-between hover:bg-[#374151] transition-all duration-200 focus:outline-none"
       >
-        <div className="flex items-center gap-4">
-          <div className="bg-[#333] p-3 rounded-full flex items-center justify-center">
-            <span className="text-2xl">📱</span>
+        <div className="flex flex-col items-start">
+          <div className="text-white font-medium text-lg">
+            {connectedDevice.name}
           </div>
-          <div className="text-left">
-            <div className="font-medium text-lg">{connectedDevice.name}</div>
-            <div className="text-green-500 text-sm font-medium">
-              {state?.deviceStatus} • {transportType}
-            </div>
+          <div className={`text-sm ${statusDisplay.color}`}>
+            {statusDisplay.text}
           </div>
         </div>
-        <span className={`text-gray-400 transform transition-transform ${isExpanded ? 'rotate-180' : ''} bg-[#333] h-8 w-8 rounded-full flex items-center justify-center`}>
-          ▼
-        </span>
+        <svg
+          className={`w-5 h-5 text-gray-400 transform transition-transform ${
+            isExpanded ? 'rotate-180' : ''
+          }`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
       </button>
 
       {isExpanded && (
-        <div className="mt-3 bg-[#2a2a2a] rounded-xl p-4 shadow-lg border border-gray-800 animate-fadeIn">
+        <div className="mt-2 bg-[#2d3748] border border-[#4a5568] rounded-lg p-4">
           <button
             type="button"
-            onClick={async () => await bridge.disconnect()}
-            className="text-red-400 hover:text-red-300 flex items-center gap-2 px-3 py-2 rounded-lg bg-[#333] hover:bg-[#444] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50"
+            onClick={async () => {
+              await bridge.disconnect();
+              setIsExpanded(false);
+            }}
+            className="text-red-400 hover:text-red-300 flex items-center gap-2 px-3 py-2 rounded-lg bg-[#374151] hover:bg-[#4a5568] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-4 h-4" aria-hidden="true">
-              <title>Close icon</title>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              className="w-4 h-4"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
             {t('buttons.disconnect')}
           </button>

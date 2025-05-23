@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import './LanguageSwitcher.css';
 
@@ -12,16 +12,33 @@ const languageOptions = [
 export default function LanguageSwitcher() {
   const { i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
-  const currentLanguage = languageOptions.find(lang => lang.code === i18n.language) || languageOptions[0];
+  const currentLanguage =
+    languageOptions.find((lang) => lang.code === i18n.language) ||
+    languageOptions[0];
 
   const changeLanguage = (code) => {
     i18n.changeLanguage(code);
     setIsOpen(false);
   };
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
-    <div className="language-switcher">
+    <div className="language-switcher" ref={dropdownRef}>
       <button
         type="button"
         className="language-button"
@@ -38,7 +55,9 @@ export default function LanguageSwitcher() {
             <button
               key={lang.code}
               type="button"
-              className={`language-option ${lang.code === i18n.language ? 'active' : ''}`}
+              className={`language-option ${
+                lang.code === i18n.language ? 'active' : ''
+              }`}
               onClick={() => changeLanguage(lang.code)}
               aria-label={`Change language to ${lang.name}`}
             >

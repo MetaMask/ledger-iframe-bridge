@@ -1,92 +1,105 @@
 import { useLedgerBridge } from '../providers/LedgerBridgeProvider';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { DeviceStatus } from '@ledgerhq/device-management-kit';
 
 export default function ActionNotificationBox() {
   const { t } = useTranslation();
-  const { actionState, deviceStatus } = useLedgerBridge();
-  
-  // Determine status color based on device status
-  const getStatusColorClass = () => {
-    switch(deviceStatus?.toLowerCase()) {
-      case 'connected':
-        return 'from-green-400 to-green-600';
-      case 'pending':
-      case 'loading':
-        return 'from-amber-400 to-amber-600';
-      case 'disconnected':
-      case 'error':
-        return 'from-red-400 to-red-600';
+  const { actionState, deviceStatus, sessionId } = useLedgerBridge();
+
+  // Map device status from DMK to display status
+  const getDisplayStatus = () => {
+    // If there's an ongoing action that's not 'None', show as Busy
+    if (actionState && actionState !== 'None' && actionState !== 'none') {
+      return t('common.busy');
+    }
+
+    // Map DMK device status to display status
+    switch (deviceStatus) {
+      case DeviceStatus.CONNECTED:
+        return t('buttons.connected');
+      case DeviceStatus.LOCKED:
+        return t('common.busy');
+      case DeviceStatus.NOT_CONNECTED:
+        return t('common.disconnected');
       default:
-        return 'from-blue-400 to-blue-600';
+        return t('buttons.connected');
     }
   };
 
-  // Determine action icon/style based on action state
-  const getActionIndicator = () => {
-    switch(actionState?.toLowerCase()) {
-      case 'processing':
-        return (
-          <div className="animate-pulse flex items-center">
-            <div className="h-3 w-3 bg-amber-400 rounded-full mr-2" />
-            <span className="font-medium">{t('actionStatus.processing')}</span>
-          </div>
-        );
-      case 'approved':
-      case 'success':
-        return (
-          <div className="flex items-center">
-            <div className="h-3 w-3 bg-green-400 rounded-full mr-2" />
-            <span className="font-medium text-green-400">{actionState}</span>
-          </div>
-        );
-      case 'rejected':
-      case 'error':
-        return (
-          <div className="flex items-center">
-            <div className="h-3 w-3 bg-red-400 rounded-full mr-2" />
-            <span className="font-medium text-red-400">{actionState}</span>
-          </div>
-        );
-      default:
-        return (
-          <div className="flex items-center">
-            <div className="h-3 w-3 bg-gray-400 rounded-full mr-2" />
-            <span className="font-medium">{actionState || t('actionStatus.waiting')}</span>
-          </div>
-        );
+  // Determine status color based on display status
+  const getStatusColor = (status) => {
+    const busyText = t('common.busy');
+    const connectedText = t('buttons.connected');
+    const disconnectedText = t('common.disconnected');
+
+    if (status === connectedText) {
+      return 'text-green-400';
+    } else if (status === busyText) {
+      return 'text-amber-400';
+    } else if (status === disconnectedText || status === t('common.error')) {
+      return 'text-red-400';
+    } else {
+      return 'text-gray-400';
     }
   };
+
+  // Format action state for display
+  const getDisplayAction = () => {
+    if (!actionState || actionState === 'none' || actionState === 'None') {
+      return t('actions.none');
+    }
+
+    // Map specific action states to translation keys
+    switch (actionState) {
+      case 'sign Transaction':
+        return t('actions.signTransaction');
+      case 'sign Typed Data':
+        return t('actions.signTypedData');
+      case 'sign Personal Message':
+        return t('actions.signPersonalMessage');
+      default:
+        // Capitalize first letter and format for unmapped actions
+        return actionState.charAt(0).toUpperCase() + actionState.slice(1);
+    }
+  };
+
+  const currentDeviceStatus = getDisplayStatus();
+  const currentAction = getDisplayAction();
+  const displaySessionId = sessionId || 'aaqytb';
 
   return (
-    <div className="w-full bg-[#222222] rounded-2xl p-6 shadow-lg border border-gray-800 transform transition-all duration-300 hover:shadow-xl hover:scale-[1.01]">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-green-400">
+    <div className="w-full space-y-4">
+      {/* Device Status */}
+      <div className="flex items-center justify-between">
+        <span className="text-white text-sm font-medium">
           {t('actionStatus.deviceStatus')}
-        </h2>
-        <div className={`px-3 py-1 rounded-full bg-gradient-to-r ${getStatusColorClass()} text-white text-sm font-medium shadow-inner`}>
-          {deviceStatus || t('common.notAvailable')}
-        </div>
+        </span>
+        <span
+          className={`text-sm font-medium ${getStatusColor(
+            currentDeviceStatus,
+          )}`}
+        >
+          {currentDeviceStatus}
+        </span>
       </div>
-      
-      <div className="space-y-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-green-400">
-            {t('actionStatus.currentAction')}
-          </h2>
-          <div className="px-3 py-1 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm font-medium shadow-inner">
-            {actionState || t('actionStatus.waiting')}
-          </div>
-        </div>
-        
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-green-400">
-            {t('actionStatus.sessionId')}
-          </h2>
-          <div className="px-3 py-1 rounded-full bg-gradient-to-r from-purple-400 to-indigo-600 text-white text-sm font-medium shadow-inner font-mono">
-            {Math.random().toString(36).substring(2, 8)}
-          </div>
-        </div>
+
+      {/* Current Action */}
+      <div className="flex items-center justify-between">
+        <span className="text-white text-sm font-medium">
+          {t('actionStatus.currentAction')}
+        </span>
+        <span className="text-gray-400 text-sm">{currentAction}</span>
+      </div>
+
+      {/* Session ID */}
+      <div className="flex items-center justify-between">
+        <span className="text-white text-sm font-medium">
+          {t('actionStatus.sessionId')}
+        </span>
+        <span className="text-gray-400 text-sm font-mono">
+          {displaySessionId}
+        </span>
       </div>
     </div>
   );

@@ -1,7 +1,10 @@
 {
   "app": {
     "title": "Metamask Ledger App",
-    "footer": "Metamask Ledger App"
+    "footer": "Metamask Ledger App",
+    "connectLedger": "Connect Ledger",
+    "helpText": "Need help connecting with MetaMask?",
+    "learnMore": "Learn more"
   },
   "menu": {
     "home": "Home",
@@ -14,7 +17,11 @@
     "title": "Available devices",
     "usb": "USB",
     "bluetooth": "Bluetooth",
-    "noDevices": "No devices available"
+    "noDevices": "No devices available",
+    "noDevicesFound": "No devices found. Please connect your Ledger device.",
+    "viaUsb": "via USB",
+    "viaBluetooth": "via Bluetooth",
+    "unavailable": "Unavailable"
   },
   "sidebar": {
     "menu": "Menu"
@@ -37,7 +44,16 @@
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
-    "notAvailable": "Not available"
+    "notAvailable": "Not available",
+    "busy": "Busy",
+    "disconnected": "Disconnected",
+    "none": "None"
+  },
+  "actions": {
+    "none": "None",
+    "signTransaction": "Sign Transaction",
+    "signTypedData": "Sign Typed Data",
+    "signPersonalMessage": "Sign Personal Message"
   },
   "ethCommands": {
     "signTransaction": "Test Sign Transaction",

@@ -20,7 +20,7 @@ i18n
     },
     backend: {
       // Path to load translations from
-      loadPath: '/src/locales/{{lng}}/{{ns}}.json',
+      loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
     detection: {
       // Order and from where user language should be detected
