@@ -7,9 +7,22 @@ import {
 import { SignerEthBuilder } from '@ledgerhq/device-signer-kit-ethereum';
 import { webHidTransportFactory } from '@ledgerhq/device-transport-kit-web-hid';
 import { webBleTransportFactory } from '@ledgerhq/device-transport-kit-web-ble';
-import { Observable } from 'rxjs';
 import { hexToAscii } from './utils/HexUtils';
 import { DeviceStatus } from '@ledgerhq/device-management-kit';
+
+// Redux imports
+import { store } from './store';
+import {
+  setBridge,
+  setDmk,
+  setConnectionStatus,
+  setConnectedDevice,
+  setSessionId,
+  setActionState,
+  setDeviceStatus,
+  setTransportType,
+  setError,
+} from './store/ledgerSlice';
 
 export const WEBHID = 'WEB-HID';
 export const BLE = 'WEB-BLE';
@@ -38,6 +51,10 @@ export default class LedgerBridge {
       // .addLogger(new FlipperDmkLogger())
       .build();
 
+    // Initialize Redux state with bridge and dmk instances
+    store.dispatch(setBridge(this));
+    store.dispatch(setDmk(this.dmk));
+    store.dispatch(setTransportType(this.transportType));
     this.addEventListeners();
   }
 
@@ -187,15 +204,18 @@ export default class LedgerBridge {
     console.log('makeApp');
     if (!this.transportType) {
       this.transportType = WEBHID;
+      store.dispatch(setTransportType(this.transportType));
     }
 
     if (!this.sessionId) {
       try {
         this.actionState = 'Wait for connection';
+        store.dispatch(setActionState(this.actionState));
         // this.createConnection();
         this.#setupInterval(callback);
       } catch (error) {
         console.error('Error:', error);
+        store.dispatch(setError(error.message));
       }
     } else {
       callback();
@@ -204,6 +224,15 @@ export default class LedgerBridge {
 
   createConnection() {
     console.log('createConnection');
+
+    // Update Redux state to show connecting
+    store.dispatch(
+      setConnectionStatus({
+        isConnected: false,
+        status: 'Connecting',
+      }),
+    );
+    store.dispatch(setActionState('Connecting'));
 
     const calConfig = {
       url: 'https://crypto-assets-service.api.ledger.com/v1',
@@ -224,26 +253,59 @@ export default class LedgerBridge {
 
     this.dmk.startDiscovering({ transport: this.transportType }).subscribe({
       next: (device) => {
-        this.dmk.connect({ device }).then((sessionId) => {
-          const connectedDevice = this.dmk.getConnectedDevice({
-            sessionId,
-          });
-          this.connectedDevice = connectedDevice;
+        console.log('Connecting to device:', device);
+        this.dmk
+          .connect({ device })
+          .then((sessionId) => {
+            const connectedDevice = this.dmk.getConnectedDevice({
+              sessionId,
+            });
 
-          this.sessionId = sessionId;
-          this.ethSigner = new SignerEthBuilder({
-            dmk: this.dmk,
-            sessionId,
+            // Update local properties
+            this.connectedDevice = connectedDevice;
+            this.sessionId = sessionId;
+
+            // Update Redux state
+            store.dispatch(setConnectedDevice(connectedDevice));
+            store.dispatch(setSessionId(sessionId));
+            store.dispatch(
+              setConnectionStatus({
+                isConnected: true,
+                status: 'Connected',
+              }),
+            );
+            store.dispatch(setActionState('None'));
+
+            this.ethSigner = new SignerEthBuilder({
+              dmk: this.dmk,
+              sessionId,
+            })
+              .withContextModule(contextModule)
+              .build();
+
+            // // setup subscription for device status
+            this.#setupDeviceStatusSubscription();
           })
-            .withContextModule(contextModule)
-            .build();
-
-          // // setup subscription for device status
-          this.#setupDeviceStatusSubscription();
-        });
+          .catch((error) => {
+            console.error('Connection error:', error);
+            store.dispatch(setError(error.message));
+            store.dispatch(
+              setConnectionStatus({
+                isConnected: false,
+                status: 'Error',
+              }),
+            );
+          });
       },
       error: (error) => {
-        console.error('Error:', error);
+        console.error('Discovery error:', error);
+        store.dispatch(setError(error.message));
+        store.dispatch(
+          setConnectionStatus({
+            isConnected: false,
+            status: 'Error',
+          }),
+        );
         throw error;
       },
       complete: () => {
@@ -256,6 +318,7 @@ export default class LedgerBridge {
     this.interval = setInterval(() => {
       if (this.deviceStatus === DeviceStatus.LOCKED) {
         this.actionState = 'Wait for Unlock';
+        store.dispatch(setActionState(this.actionState));
       }
       if (this.deviceStatus === DeviceStatus.CONNECTED) {
         callback();
@@ -275,9 +338,12 @@ export default class LedgerBridge {
     this.dmk.getDeviceSessionState({ sessionId: this.sessionId }).subscribe({
       next: (state) => {
         this.deviceStatus = state.deviceStatus;
+        // Update Redux state with device status
+        store.dispatch(setDeviceStatus(state.deviceStatus));
       },
       error: (error) => {
-        console.error('Error:', error);
+        console.error('Device status error:', error);
+        store.dispatch(setError(error.message));
       },
       complete: () => {
         console.log('Device session state subscription completed');
@@ -291,6 +357,8 @@ export default class LedgerBridge {
       // this.transportType = transportType;
       this.cleanUp(replyAction, messageId, source);
       this.transportType = transportType;
+      // Update Redux state with new transport type
+      store.dispatch(setTransportType(transportType));
     }
 
     this.sendMessageToExtension(
@@ -323,6 +391,7 @@ export default class LedgerBridge {
     console.log('unlock', hdPath);
     this.makeApp(() => {
       this.actionState = 'Unlock';
+      store.dispatch(setActionState(this.actionState));
       const { observable, cancel } = this.ethSigner.getAddress(
         hdPath.replace('m/', ''),
         {
@@ -364,6 +433,7 @@ export default class LedgerBridge {
     console.log('signTransaction', hdPath, tx);
     this.makeApp(() => {
       this.actionState = 'sign Transaction';
+      store.dispatch(setActionState(this.actionState));
       console.log('signTransaction', hdPath, tx);
 
       const transaction = hexaStringToBuffer(tx);
@@ -409,6 +479,7 @@ export default class LedgerBridge {
     console.log('signPersonalMessage', hdPath, message);
     this.makeApp(() => {
       this.actionState = 'sign Personal Message';
+      store.dispatch(setActionState(this.actionState));
 
       // check the message is hex string or not
       // if (isHexaString(message)) {
@@ -457,6 +528,7 @@ export default class LedgerBridge {
     console.log('signTypedData', hdPath, message);
     this.makeApp(() => {
       this.actionState = 'sign Typed Data';
+      store.dispatch(setActionState(this.actionState));
 
       const { observable, cancel } = this.ethSigner.signTypedData(
         hdPath.replace('m/', ''),
@@ -496,12 +568,27 @@ export default class LedgerBridge {
     if (this.dmk && this.sessionId) {
       await this.dmk.disconnect({ sessionId: this.sessionId });
     }
+
+    // Clear local properties
     this.sessionId = undefined;
     this.connectedDevice = undefined;
     this.ethSigner = undefined;
     this.actionState = 'None';
     this.source = undefined;
     this.deviceStatus = undefined;
+
+    // Update Redux state
+    store.dispatch(
+      setConnectionStatus({
+        isConnected: false,
+        status: 'Disconnected',
+      }),
+    );
+    store.dispatch(setConnectedDevice(null));
+    store.dispatch(setSessionId(null));
+    store.dispatch(setActionState('None'));
+    store.dispatch(setDeviceStatus(null));
+    store.dispatch(setError(null));
   }
 
   async close() {

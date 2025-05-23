@@ -1,19 +1,20 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { WEBHID } from '../ledger-bridge';
+import { useLedgerRedux } from '../hooks/useLedgerRedux';
 import useAvailableDevices from '../hooks/useAvailableDevices';
-import { useLedgerBridge } from '../providers/LedgerBridgeProvider';
-import { LEDGER_LIVE_PATH, WEBHID } from '../ledger-bridge';
 
 export default function AvailableDevices() {
   const { t } = useTranslation();
-  const { bridge, status, connectedDevice, sessionId } = useLedgerBridge();
+  const { bridge, status, sessionId } = useLedgerRedux();
   const discoveredDevices = useAvailableDevices();
   const noDevice = discoveredDevices.length === 0;
   const isConnected = status === 'Connected' && sessionId !== null;
 
   const handleConnect = async () => {
     try {
-      await bridge.createConnection();
+      if (bridge) {
+        await bridge.createConnection();
+      }
     } catch (error) {
       console.error('Failed to connect:', error);
     }

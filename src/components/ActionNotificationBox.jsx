@@ -1,51 +1,52 @@
-import { useLedgerBridge } from '../providers/LedgerBridgeProvider';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DeviceStatus } from '@ledgerhq/device-management-kit';
+import { useLedgerRedux } from '../hooks/useLedgerRedux';
 
 export default function ActionNotificationBox() {
   const { t } = useTranslation();
-  const { actionState, deviceStatus, sessionId } = useLedgerBridge();
+  const { actionState, deviceStatus, sessionId } = useLedgerRedux();
 
   // Map device status from DMK to display status
-  const getDisplayStatus = () => {
-    // If there's an ongoing action that's not 'None', show as Busy
-    if (actionState && actionState !== 'None' && actionState !== 'none') {
-      return t('common.busy');
-    }
-
+  const getDisplayStatus = useCallback(() => {
     // Map DMK device status to display status
     switch (deviceStatus) {
       case DeviceStatus.CONNECTED:
         return t('buttons.connected');
       case DeviceStatus.LOCKED:
-        return t('common.busy');
+        return t('common.locked');
       case DeviceStatus.NOT_CONNECTED:
         return t('common.disconnected');
       default:
         return t('buttons.connected');
     }
-  };
+  }, [deviceStatus, t]);
 
   // Determine status color based on display status
-  const getStatusColor = (status) => {
-    const busyText = t('common.busy');
-    const connectedText = t('buttons.connected');
-    const disconnectedText = t('common.disconnected');
+  const getStatusColor = useCallback(
+    (status) => {
+      const busyText = t('common.busy');
+      const connectedText = t('buttons.connected');
+      const disconnectedText = t('common.disconnected');
+      const lockedText = t('common.locked');
 
-    if (status === connectedText) {
-      return 'text-green-400';
-    } else if (status === busyText) {
-      return 'text-amber-400';
-    } else if (status === disconnectedText || status === t('common.error')) {
-      return 'text-red-400';
-    } else {
-      return 'text-gray-400';
-    }
-  };
+      if (status === connectedText) {
+        return 'text-green-400';
+      } else if (status === busyText) {
+        return 'text-amber-400';
+      } else if (status === lockedText) {
+        return 'text-yellow-400';
+      } else if (status === disconnectedText || status === t('common.error')) {
+        return 'text-red-400';
+      } else {
+        return 'text-gray-400';
+      }
+    },
+    [t],
+  );
 
   // Format action state for display
-  const getDisplayAction = () => {
+  const getDisplayAction = useCallback(() => {
     if (!actionState || actionState === 'none' || actionState === 'None') {
       return t('actions.none');
     }
@@ -62,7 +63,7 @@ export default function ActionNotificationBox() {
         // Capitalize first letter and format for unmapped actions
         return actionState.charAt(0).toUpperCase() + actionState.slice(1);
     }
-  };
+  }, [actionState, t]);
 
   const currentDeviceStatus = getDisplayStatus();
   const currentAction = getDisplayAction();

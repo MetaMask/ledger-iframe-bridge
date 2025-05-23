@@ -1,21 +1,14 @@
 import { useState } from 'react';
-import { useLedgerBridge } from '../providers/LedgerBridgeProvider';
-import { useDeviceSessionState } from '../hooks/useDeviceSessionState';
 import { useTranslation } from 'react-i18next';
 import { DeviceStatus } from '@ledgerhq/device-management-kit';
+import { useLedgerRedux } from '../hooks/useLedgerRedux';
+import { WEBHID } from '../ledger-bridge';
 
 export default function DeviceSession() {
   const { t } = useTranslation();
   const [isExpanded, setIsExpanded] = useState(false);
-  const {
-    bridge,
-    transportType,
-    connectedDevice,
-    sessionId,
-    actionState,
-    deviceStatus,
-  } = useLedgerBridge();
-  const state = useDeviceSessionState(sessionId);
+  const { bridge, transportType, connectedDevice, deviceStatus } =
+    useLedgerRedux();
 
   if (!bridge || !connectedDevice) {
     return null;
@@ -23,17 +16,12 @@ export default function DeviceSession() {
 
   // Determine display status
   const getDisplayStatus = () => {
-    // If there's an ongoing action that's not 'None', show as Busy
-    if (actionState && actionState !== 'None' && actionState !== 'none') {
-      return t('common.busy');
-    }
-
     // Map DMK device status to display status
     switch (deviceStatus) {
       case DeviceStatus.CONNECTED:
         return t('buttons.connected');
       case DeviceStatus.LOCKED:
-        return t('common.busy');
+        return t('common.locked');
       case DeviceStatus.NOT_CONNECTED:
         return t('common.disconnected');
       default:
@@ -43,7 +31,7 @@ export default function DeviceSession() {
 
   const displayStatus = getDisplayStatus();
   const transportDisplay =
-    transportType === 'USB'
+    transportType === WEBHID
       ? t('availableDevices.viaUsb')
       : t('availableDevices.viaBluetooth');
 
@@ -51,6 +39,8 @@ export default function DeviceSession() {
   const getStatusDisplay = () => {
     if (displayStatus === t('common.busy')) {
       return { text: t('common.busy'), color: 'text-amber-400' };
+    } else if (displayStatus === t('common.locked')) {
+      return { text: t('common.locked'), color: 'text-yellow-400' };
     } else {
       return {
         text: `${t('buttons.connected')} ${transportDisplay}`,

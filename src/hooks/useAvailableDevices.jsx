@@ -1,21 +1,27 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useLedgerBridge } from "../providers/LedgerBridgeProvider";
+import { useEffect, useMemo, useRef } from 'react';
+import { useLedgerRedux } from './useLedgerRedux';
 
-export default function useAvailableDevices(){
-  const { dmk, connectedDevice } = useLedgerBridge();
-  const [discoveredDevices, setDiscoveredDevices] = useState([]);
+export default function useAvailableDevices() {
+  const { dmk, discoveredDevices, connectedDevice, actions } = useLedgerRedux();
 
   const subscription = useRef(null);
+
   useEffect(() => {
     if (!dmk) return;
+
     if (!subscription.current) {
-      subscription.current = dmk.listenToAvailableDevices({}).subscribe((devices) => {
-        setDiscoveredDevices(devices);
-      });
+      console.log('Starting device discovery');
+      subscription.current = dmk
+        .listenToAvailableDevices({})
+        .subscribe((devices) => {
+          console.log('Discovered devices:', devices);
+          actions.setDiscoveredDevices(devices);
+        });
     }
+
     return () => {
       if (subscription.current) {
-        setDiscoveredDevices([]);
+        actions.setDiscoveredDevices([]);
         subscription.current.unsubscribe();
         subscription.current = null;
       }
@@ -26,11 +32,15 @@ export default function useAvailableDevices(){
     () =>
       discoveredDevices.map((device) => ({
         ...device,
-        connected: connectedDevice && Object.values(connectedDevice).some(
-          (connectedDevice) => connectedDevice.id === device.id,
-        ),
+        connected:
+          connectedDevice &&
+          (connectedDevice.id === device.id ||
+            (typeof connectedDevice === 'object' &&
+              Object.values(connectedDevice).some(
+                (cd) => cd && cd.id === device.id,
+              ))),
       })),
-    [discoveredDevices],
+    [discoveredDevices, connectedDevice],
   );
 
   return result;

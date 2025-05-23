@@ -47,6 +47,7 @@
     "notAvailable": "暂不可用",
     "busy": "处理中",
     "disconnected": "已断开",
+    "locked": "已锁定",
     "none": "无"
   },
   "actions": {

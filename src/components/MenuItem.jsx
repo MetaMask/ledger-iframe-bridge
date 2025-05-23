@@ -1,17 +1,16 @@
-import { useLedgerBridge } from '../providers/LedgerBridgeProvider';
 import { useNavigate } from 'react-router-dom';
-import { useDeviceSessionState } from '../hooks/useDeviceSessionState';
 import { DeviceStatus } from '@ledgerhq/device-management-kit';
 import { useTranslation } from 'react-i18next';
+import { useLedgerRedux } from '../hooks/useLedgerRedux';
 import './MenuItem.css';
 
 export default function MenuItem({ icon, label, id }) {
   const { t } = useTranslation();
-  const { bridge, sessionId } = useLedgerBridge();
+  const { bridge, deviceStatus } = useLedgerRedux();
   const navigate = useNavigate();
-  const state = useDeviceSessionState(sessionId);
 
-  const isDisabled = id !== 'Home' && (!bridge || state?.deviceStatus !== DeviceStatus.CONNECTED);
+  const isDisabled =
+    id !== 'Home' && (!bridge || deviceStatus !== DeviceStatus.CONNECTED);
 
   const handleClick = () => {
     switch (id) {

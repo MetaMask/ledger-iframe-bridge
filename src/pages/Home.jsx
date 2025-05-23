@@ -1,27 +1,31 @@
 import React from 'react';
-import { useLedgerBridge } from '../providers/LedgerBridgeProvider';
 import { WEBHID, BLE } from '../ledger-bridge';
 import AvailableDevices from '../components/AvailableDevices';
 import DeviceSession from '../components/DeviceSession';
 import ActionNotificationBox from '../components/ActionNotificationBox';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
+import { useLedgerRedux } from '../hooks/useLedgerRedux';
 
 export default function Home() {
   const { t } = useTranslation();
-  const { bridge, status, connectedDevice, sessionId } = useLedgerBridge();
+  const { bridge, status, connectedDevice, sessionId } = useLedgerRedux();
   const isConnected = status === 'Connected' && sessionId !== null;
 
   const handleUSBSelect = () => {
     console.log('USB device selection clicked');
-    bridge.updateTransportTypePreference('test-usb', WEBHID, 'messageId');
-    bridge.createConnection();
+    if (bridge) {
+      bridge.updateTransportTypePreference('test-usb', WEBHID, 'messageId');
+      bridge.createConnection();
+    }
   };
 
   const handleBLESelect = () => {
     console.log('BLE device selection clicked');
-    bridge.updateTransportTypePreference('test-ble', BLE, 'messageId');
-    bridge.createConnection();
+    if (bridge) {
+      bridge.updateTransportTypePreference('test-ble', BLE, 'messageId');
+      bridge.createConnection();
+    }
   };
 
   return (

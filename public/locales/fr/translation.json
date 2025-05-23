@@ -47,6 +47,7 @@
     "notAvailable": "Non disponible",
     "busy": "Occupé",
     "disconnected": "Déconnecté",
+    "locked": "Bloqué",
     "none": "Aucun"
   },
   "actions": {

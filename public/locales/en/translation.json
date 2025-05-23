@@ -46,6 +46,7 @@
     "success": "Success",
     "notAvailable": "Not available",
     "busy": "Busy",
+    "locked": "Locked",
     "disconnected": "Disconnected",
     "none": "None"
   },
