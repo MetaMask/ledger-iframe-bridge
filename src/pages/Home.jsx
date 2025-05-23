@@ -11,14 +11,8 @@ import { useLedgerRedux } from '../hooks/useLedgerRedux';
 
 export default function Home() {
   const { t } = useTranslation();
-  const {
-    bridge,
-    status,
-    connectedDevice,
-    sessionId,
-    deviceStatus,
-    actionState,
-  } = useLedgerRedux();
+  const { bridge, status, sessionId, deviceStatus, actionState, timeLeft } =
+    useLedgerRedux();
   const isConnected = status === 'Connected' && sessionId !== null;
 
   const handleUSBSelect = () => {
@@ -79,7 +73,11 @@ export default function Home() {
         <h1 className="text-3xl font-semibold text-white text-center mb-6">
           {t('app.connectLedger')}
         </h1>
-
+        {timeLeft >= 0 && (
+          <div className="text-sm text-gray-400 mb-4">
+            {t('messages.timeLeft', { timeLeft: timeLeft })}
+          </div>
+        )}
         {/* Warning Message - Show when device is not connected or locked */}
         {(deviceStatus === DeviceStatus.NOT_CONNECTED || !deviceStatus) && (
           <MessageBox

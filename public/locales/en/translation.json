@@ -70,8 +70,9 @@
     "waiting": "Waiting for action"
   },
   "messages": {
-    "connectDeviceWarning": "Please connect your Ledger device to continue your operation",
-    "unlockDeviceWarning": "Please unlock your Ledger and open Ethereum app to continue",
-    "continueOperationWarning": "Please continue your operations on your Ledger device"
+    "connectDeviceWarning": "Please connect your Ledger device to continue your operation.",
+    "unlockDeviceWarning": "Please unlock your Ledger and open Ethereum app to continue.",
+    "continueOperationWarning": "Please continue your operations on your Ledger device.",
+    "timeLeft": "You have {{timeLeft}} seconds left to close the page."
   }
 }

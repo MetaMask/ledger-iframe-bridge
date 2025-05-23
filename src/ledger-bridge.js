@@ -22,6 +22,7 @@ import {
   setDeviceStatus,
   setTransportType,
   setError,
+  setTimeLeft,
 } from './store/ledgerSlice';
 
 export const WEBHID = 'WEB-HID';
@@ -31,6 +32,7 @@ export const LEDGER_LIVE_PATH = `m/44'/60'/0'/0/0`;
 export const LEDGER_BIP44_PATH = `m/44'/60'/0'/0`;
 export const LEDGER_LEGACY_PATH = `m/44'/60'/0'`;
 
+const timeoutDuration = 60000;
 export default class LedgerBridge {
   sessionId;
   transportType = WEBHID;
@@ -40,6 +42,8 @@ export default class LedgerBridge {
   deviceStatus;
   actionState = 'none';
   interval;
+  closeTimeout;
+  timeoutInterval;
 
   source;
 
@@ -55,6 +59,11 @@ export default class LedgerBridge {
     store.dispatch(setBridge(this));
     store.dispatch(setDmk(this.dmk));
     store.dispatch(setTransportType(this.transportType));
+
+    // Start timeout for initial NOT_CONNECTED state
+    store.dispatch(setDeviceStatus(DeviceStatus.NOT_CONNECTED));
+    this.#handleAutoCloseTimeout(DeviceStatus.NOT_CONNECTED);
+
     this.addEventListeners();
   }
 
@@ -62,6 +71,8 @@ export default class LedgerBridge {
     // Listen for window close events
     window.addEventListener('beforeunload', async () => {
       console.log('Window is closing, cleaning up Ledger Bridge');
+      // Clear any auto-close timeout
+      this.#clearAutoCloseTimeout();
       // broadcast message to close screen.
       this.sendMessageToExtension(
         {
@@ -273,6 +284,9 @@ export default class LedgerBridge {
             );
             store.dispatch(setActionState('None'));
 
+            // Clear any existing timeout since we're now connected
+            this.#clearAutoCloseTimeout();
+
             this.ethSigner = new SignerEthBuilder({
               dmk: this.dmk,
               sessionId,
@@ -292,6 +306,9 @@ export default class LedgerBridge {
                 status: 'Error',
               }),
             );
+            // Set device status to NOT_CONNECTED and trigger timeout
+            store.dispatch(setDeviceStatus(DeviceStatus.NOT_CONNECTED));
+            this.#handleAutoCloseTimeout(DeviceStatus.NOT_CONNECTED);
           });
       },
       error: (error) => {
@@ -303,6 +320,9 @@ export default class LedgerBridge {
             status: 'Error',
           }),
         );
+        // Set device status to NOT_CONNECTED and trigger timeout
+        store.dispatch(setDeviceStatus(DeviceStatus.NOT_CONNECTED));
+        this.#handleAutoCloseTimeout(DeviceStatus.NOT_CONNECTED);
         throw error;
       },
       complete: () => {
@@ -337,6 +357,9 @@ export default class LedgerBridge {
         this.deviceStatus = state.deviceStatus;
         // Update Redux state with device status
         store.dispatch(setDeviceStatus(state.deviceStatus));
+
+        // Handle auto-close timeout for specific device states
+        this.#handleAutoCloseTimeout(state.deviceStatus);
       },
       error: (error) => {
         console.error('Device status error:', error);
@@ -346,6 +369,94 @@ export default class LedgerBridge {
         console.log('Device session state subscription completed');
       },
     });
+  }
+
+  #handleAutoCloseTimeout(deviceStatus) {
+    // Clear any existing timeout
+    if (deviceStatus === DeviceStatus.CONNECTED) {
+      this.#clearAutoCloseTimeout();
+    }
+
+    // Set timeout for NOT_CONNECTED or LOCKED states
+    if (
+      deviceStatus === DeviceStatus.NOT_CONNECTED ||
+      deviceStatus === DeviceStatus.LOCKED
+    ) {
+      console.log(
+        `Device status is ${deviceStatus}, starting 1-minute auto-close timeout`,
+      );
+      if (this.closeTimeout) {
+        console.log('Auto-close timeout already set');
+        return;
+      }
+
+      // Set initial time left in seconds
+      const timeLeftSeconds = timeoutDuration / 1000;
+      store.dispatch(setTimeLeft(timeLeftSeconds));
+
+      // Create interval to update countdown every second
+      this.timeoutInterval = setInterval(() => {
+        const currentTimeLeft = store.getState().ledger.timeLeft;
+        const newTimeLeft = currentTimeLeft - 1;
+
+        if (newTimeLeft <= 0) {
+          // Time's up - clear interval and close
+          clearInterval(this.timeoutInterval);
+          store.dispatch(setTimeLeft(0));
+          console.log('Auto-closing page due to device timeout');
+
+          // Send message to extension before closing
+          this.sendMessageToExtension(
+            {
+              action: 'ledger-bridge-auto-close',
+              success: true,
+              reason: `Device ${deviceStatus} timeout`,
+            },
+            this.source,
+          );
+
+          // Close the window/page
+          window.close();
+        } else {
+          // Update time left
+          store.dispatch(setTimeLeft(newTimeLeft));
+        }
+      }, 1000);
+
+      // Keep the original timeout as backup
+      this.closeTimeout = setTimeout(() => {
+        console.log('Auto-closing page due to device timeout (backup)');
+        this.#clearAutoCloseTimeout();
+
+        // Send message to extension before closing
+        this.sendMessageToExtension(
+          {
+            action: 'ledger-bridge-auto-close',
+            success: true,
+            reason: `Device ${deviceStatus} timeout`,
+          },
+          this.source,
+        );
+
+        // Close the window/page
+        window.close();
+      }, timeoutDuration);
+    }
+  }
+
+  #clearAutoCloseTimeout() {
+    if (this.closeTimeout) {
+      clearTimeout(this.closeTimeout);
+      this.closeTimeout = null;
+    }
+
+    if (this.timeoutInterval) {
+      clearInterval(this.timeoutInterval);
+      this.timeoutInterval = null;
+    }
+
+    // Reset time left in Redux
+    store.dispatch(setTimeLeft(-1));
   }
 
   updateTransportTypePreference(replyAction, transportType, messageId, source) {
@@ -562,6 +673,9 @@ export default class LedgerBridge {
   }
 
   async disconnect() {
+    // Clear any auto-close timeout
+    this.#clearAutoCloseTimeout();
+
     if (this.dmk && this.sessionId) {
       await this.dmk.disconnect({ sessionId: this.sessionId });
     }

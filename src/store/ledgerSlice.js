@@ -12,6 +12,7 @@ const initialState = {
   transportType: null,
   error: null,
   discoveredDevices: [],
+  timeLeft: -1,
 };
 
 const ledgerSlice = createSlice({
@@ -49,6 +50,9 @@ const ledgerSlice = createSlice({
     setDiscoveredDevices: (state, action) => {
       state.discoveredDevices = action.payload;
     },
+    setTimeLeft: (state, action) => {
+      state.timeLeft = action.payload;
+    },
     resetLedgerState: (state) => {
       return {
         ...initialState,
@@ -70,6 +74,7 @@ export const {
   setTransportType,
   setError,
   setDiscoveredDevices,
+  setTimeLeft,
   resetLedgerState,
 } = ledgerSlice.actions;
 

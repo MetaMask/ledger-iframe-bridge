@@ -72,6 +72,7 @@
   "messages": {
     "connectDeviceWarning": "Veuillez connecter votre appareil Ledger pour continuer votre opération",
     "unlockDeviceWarning": "Veuillez déverrouiller votre Ledger et ouvrir l'application Ethereum pour continuer",
-    "continueOperationWarning": "Veuillez continuer vos opérations sur votre appareil Ledger"
+    "continueOperationWarning": "Veuillez continuer vos opérations sur votre appareil Ledger",
+    "timeLeft": "Vous avez {{timeLeft}} secondes pour fermer la page."
   }
 }
