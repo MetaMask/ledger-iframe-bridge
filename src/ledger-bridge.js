@@ -492,6 +492,47 @@ export default class LedgerBridge {
     });
   }
 
+  signAuthorization(replyAction, hdPath, chainId, contractAddress, nonce, messageId, source) {
+    console.log('signAuthorization', hdPath);
+    this.makeApp(() => {
+      this.actionState = 'Sign Authorization';
+
+      const { observable, cancel } = this.ethSigner.signDelegationAuthorization(
+        hdPath.replace('m/', ''),
+        chainId,
+        contractAddress,
+        nonce,
+      );
+
+      observable.subscribe({
+        next: (deviceActionState) => {
+          this.handleResponse(
+            deviceActionState,
+            replyAction,
+            messageId,
+            'signDelegationAuthorization',
+            source,
+          );
+        },
+        error: (error) => {
+          console.error('signAuthorization error', error);
+          this.sendMessageToExtension(
+            {
+              action: replyAction,
+              success: false,
+              payload: { error: error },
+              messageId,
+            },
+            source,
+          );
+        },
+        complete: () => {
+          console.log('signAuthorization completed');
+        },
+      });
+    });
+  }
+
   async disconnect() {
     if (this.dmk && this.sessionId) {
       await this.dmk.disconnect({ sessionId: this.sessionId });

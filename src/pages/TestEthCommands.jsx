@@ -84,6 +84,24 @@ export default function TestEthCommands() {
       console.error(error);
     }
   }, [bridge])
+
+  const handleSignAuthorization = useCallback(async () => {
+    try {
+      const hdPath = LEDGER_LIVE_PATH;
+      await bridge.signAuthorization(
+        'test-sign-authorization',
+        hdPath,
+        11155111,
+        '0x63c0c19a282a1b52b07dd5a65b58948a07dae32b',
+        1,
+        'test',
+        undefined,
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }, [bridge]);
+
   return (
     <div className="page-container">
       {bridge && (
@@ -110,6 +128,13 @@ export default function TestEthCommands() {
               onClick={() => handleSignTypedData()}
             >
               {t('ethCommands.signTypedData')}
+            </button>
+            <button
+              type="button"
+              disabled={isDisabled}
+              onClick={() => handleSignAuthorization()}
+            >
+              {t('ethCommands.signAuthorization')}
             </button>
           </div>
         </>

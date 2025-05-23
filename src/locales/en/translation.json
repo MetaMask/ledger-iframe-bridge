@@ -42,7 +42,8 @@
   "ethCommands": {
     "signTransaction": "Test Sign Transaction",
     "signPersonalMessage": "Test Sign Personal Message",
-    "signTypedData": "Test Sign Typed Data V4"
+    "signTypedData": "Test Sign Typed Data V4",
+    "signAuthorization": "Test Sign Authorization"
   },
   "actionStatus": {
     "deviceStatus": "Device Status",
