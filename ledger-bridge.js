@@ -133,7 +133,7 @@ export default class LedgerBridge {
         action: replyAction,
         success: false,
         messageId,
-        error,
+        payload: { error },
       });
     }
   }
