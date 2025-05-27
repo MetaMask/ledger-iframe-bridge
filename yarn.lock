@@ -1909,7 +1909,7 @@ __metadata:
     prettier-plugin-packagejson: "npm:^2.2.12"
     rimraf: "npm:^4.1.2"
     terser: "npm:^5.10.0"
-    vite: "npm:^5.4.12"
+    vite: "npm:^5.4.19"
     vite-plugin-node-polyfills: "npm:^0.22.0"
   languageName: unknown
   linkType: soft
@@ -7190,9 +7190,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^5.4.12":
-  version: 5.4.14
-  resolution: "vite@npm:5.4.14"
+"vite@npm:^5.4.19":
+  version: 5.4.19
+  resolution: "vite@npm:5.4.19"
   dependencies:
     esbuild: "npm:^0.21.3"
     fsevents: "npm:~2.3.3"
@@ -7229,7 +7229,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10/ce382f4059eb6c939823b8f62163794752243755d84c71a4b73ad0f7d4d9f4c7a557a6ef4c78e0640f4bcf5ae5ec6b20c7ee4816419af3c81ba275f478b73468
+  checksum: 10/27900c87ec6f84967ba12bd4a24c2b9182c3ddad278a13a1c7736ccc4ac7e325f3fbdc11836e2906857140cc89c55121cb0746d4100046e797e21e1e7570d9c4
   languageName: node
   linkType: hard
 
