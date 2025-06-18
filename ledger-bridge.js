@@ -18,7 +18,6 @@ const serializeError = (error) => {
       message: error.message,
       name: error.name,
       stack: error.stack,
-      text: error.text,
       statusCode: error.statusCode,
       statusText: error.statusText,
     };
