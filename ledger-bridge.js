@@ -19,8 +19,8 @@ const serializeError = (error) => {
       name: error.name,
       stack: error.stack,
       text: error.text || undefined,
-      statusCode: error.statusCode || undefined,
-      statusText: error.statusText || undefined,
+      statusCode: error.statusCode,
+      statusText: error.statusText,
     };
   }
 
