@@ -3,6 +3,7 @@ import TransportWebHID from '@ledgerhq/hw-transport-webhid';
 import LedgerEth from '@ledgerhq/hw-app-eth';
 import WebSocketTransport from '@ledgerhq/hw-transport-http/lib/WebSocketTransport';
 import { SignTypedDataVersion, TypedDataUtils } from '@metamask/eth-sig-util';
+import { TransportStatusError } from '@ledgerhq/errors';
 
 // URL which triggers Ledger Live app to open and handle communication
 const BRIDGE_URL = 'ws://localhost:8435';
@@ -10,6 +11,24 @@ const BRIDGE_URL = 'ws://localhost:8435';
 // Number of seconds to poll for Ledger Live and Ethereum app opening
 const TRANSPORT_CHECK_DELAY = 1000;
 const TRANSPORT_CHECK_LIMIT = 120;
+
+const serializeError = (error) => {
+  if (error instanceof TransportStatusError) {
+    return {
+      message: error.message,
+      name: error.name,
+      stack: error.stack,
+      statusCode: error.statusCode,
+      statusText: error.statusText,
+    };
+  }
+
+  return {
+    message: error.message,
+    name: error.name,
+    stack: error.stack,
+  };
+};
 
 export default class LedgerBridge {
   constructor() {
@@ -133,7 +152,7 @@ export default class LedgerBridge {
         action: replyAction,
         success: false,
         messageId,
-        payload: { error },
+        payload: { error: serializeError(error) },
       });
     }
   }
@@ -209,12 +228,11 @@ export default class LedgerBridge {
         payload: res,
         messageId,
       });
-    } catch (err) {
-      const e = this.ledgerErrToMessage(err);
+    } catch (error) {
       this.sendMessageToExtension({
         action: replyAction,
         success: false,
-        payload: { error: e },
+        payload: { error: serializeError(error) },
         messageId,
       });
     } finally {
@@ -238,12 +256,11 @@ export default class LedgerBridge {
         payload: res,
         messageId,
       });
-    } catch (err) {
-      const e = this.ledgerErrToMessage(err);
+    } catch (error) {
       this.sendMessageToExtension({
         action: replyAction,
         success: false,
-        payload: { error: e },
+        payload: { error: serializeError(error) },
         messageId,
       });
     } finally {
@@ -264,12 +281,11 @@ export default class LedgerBridge {
         payload: res,
         messageId,
       });
-    } catch (err) {
-      const e = this.ledgerErrToMessage(err);
+    } catch (error) {
       this.sendMessageToExtension({
         action: replyAction,
         success: false,
-        payload: { error: e },
+        payload: { error: serializeError(error) },
         messageId,
       });
     } finally {
@@ -292,12 +308,11 @@ export default class LedgerBridge {
         payload: res,
         messageId,
       });
-    } catch (err) {
-      const e = this.ledgerErrToMessage(err);
+    } catch (error) {
       this.sendMessageToExtension({
         action: replyAction,
         success: false,
-        payload: { error: e },
+        payload: { error: serializeError(error) },
         messageId,
       });
     } finally {
