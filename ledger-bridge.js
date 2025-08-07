@@ -2,6 +2,7 @@ import TransportWebUSB from '@ledgerhq/hw-transport-webusb';
 import TransportWebHID from '@ledgerhq/hw-transport-webhid';
 import LedgerEth from '@ledgerhq/hw-app-eth';
 import WebSocketTransport from '@ledgerhq/hw-transport-http/lib/WebSocketTransport';
+import { EthAppNftNotSupported } from "@ledgerhq/hw-app-eth/lib/errors";
 import { SignTypedDataVersion, TypedDataUtils } from '@metamask/eth-sig-util';
 import { TransportStatusError } from '@ledgerhq/errors';
 
@@ -245,11 +246,27 @@ export default class LedgerBridge {
   async signTransaction(replyAction, hdPath, tx, messageId) {
     try {
       await this.makeApp();
-      const res = await this.app.clearSignTransaction(hdPath, tx, {
+      const resolutionConfig =  {
         nft: true,
         externalPlugins: true,
         erc20: true,
-      });
+      };
+      let res;
+      try {
+        res = await this.app.clearSignTransaction(hdPath, tx, resolutionConfig)
+      } catch(error) {
+        if (error instanceof EthAppNftNotSupported) {
+            console.log(
+              "NFT clear signing not supported => fallback to blind signing"
+            );
+            res = await this.app.clearSignTransaction(hdPath, tx, {
+              ...resolutionConfig,
+              nft: false,
+            });
+          } else {
+            throw error;
+          }
+      }
       this.sendMessageToExtension({
         action: replyAction,
         success: true,
