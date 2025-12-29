@@ -33,7 +33,7 @@ const serializeError = (error) => {
 export default class LedgerBridge {
   constructor() {
     this.addEventListeners();
-    this.transportType = 'u2f';
+    this.transportType = 'webhid';
   }
 
   addEventListeners() {
@@ -101,6 +101,9 @@ export default class LedgerBridge {
               break;
             case 'ledger-make-app':
               this.attemptMakeApp(replyAction, messageId);
+              break;
+            case 'ledger-get-app-name-and-version':
+              this.getAppAndName(replyAction, messageId);
               break;
             case 'ledger-sign-typed-data':
               this.signTypedData(
@@ -193,9 +196,53 @@ export default class LedgerBridge {
     }
   }
 
-  updateTransportTypePreference(replyAction, transportType, messageId) {
+  async getAppAndName(replyAction, messageId) {
+    try {
+      await this.makeApp();
+      const response = await this.transport.send(0xb0, 0x01, 0x00, 0x00);
+      if (response[0] !== 1) {
+        throw new Error('Incorrect format return from getAppNameAndVersion.');
+      }
+
+      let i = 1;
+      const nameLength = response[i] ?? 0;
+      i += 1;
+
+      const appName = response
+        .slice(i, (i += nameLength))
+        .toString(this.transportEncoding);
+
+      const versionLength = response[i] ?? 0;
+      i += 1;
+
+      const version = response
+        .slice(i, (i += versionLength))
+        .toString(this.transportEncoding);
+
+      const res = {
+        appName,
+        version,
+      };
+
+      this.sendMessageToExtension({
+        action: replyAction,
+        success: true,
+        payload: res,
+        messageId,
+      });
+    } catch (error) {
+      this.sendMessageToExtension({
+        action: replyAction,
+        success: false,
+        payload: { error: serializeError(error) },
+        messageId,
+      });
+    }
+  }
+
+  async updateTransportTypePreference(replyAction, transportType, messageId) {
     this.transportType = transportType;
-    this.cleanUp();
+    await this.cleanUp();
     this.sendMessageToExtension({
       action: replyAction,
       success: true,
