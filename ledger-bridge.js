@@ -33,7 +33,7 @@ const serializeError = (error) => {
 export default class LedgerBridge {
   constructor() {
     this.addEventListeners();
-    this.transportType = 'webhid';
+    this.transportType = 'u2f';
   }
 
   addEventListeners() {
