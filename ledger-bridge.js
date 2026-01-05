@@ -237,6 +237,10 @@ export default class LedgerBridge {
         payload: { error: serializeError(error) },
         messageId,
       });
+    } finally {
+      if (this.transportType !== 'ledgerLive') {
+        this.cleanUp();
+      }
     }
   }
 
