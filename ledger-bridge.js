@@ -240,9 +240,9 @@ export default class LedgerBridge {
     }
   }
 
-  async updateTransportTypePreference(replyAction, transportType, messageId) {
+  updateTransportTypePreference(replyAction, transportType, messageId) {
     this.transportType = transportType;
-    await this.cleanUp();
+    this.cleanUp();
     this.sendMessageToExtension({
       action: replyAction,
       success: true,
