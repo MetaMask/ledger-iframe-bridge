@@ -210,14 +210,14 @@ export default class LedgerBridge {
 
       const appName = response
         .slice(i, (i += nameLength))
-        .toString(this.transportEncoding);
+        .toString();
 
       const versionLength = response[i] ?? 0;
       i += 1;
 
       const version = response
         .slice(i, (i += versionLength))
-        .toString(this.transportEncoding);
+        .toString();
 
       const res = {
         appName,
