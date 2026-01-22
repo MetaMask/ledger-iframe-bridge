@@ -102,6 +102,9 @@ export default class LedgerBridge {
             case 'ledger-make-app':
               this.attemptMakeApp(replyAction, messageId);
               break;
+            case 'ledger-get-app-name-and-version':
+              this.getAppNameAndVersion(replyAction, messageId);
+              break;
             case 'ledger-sign-typed-data':
               this.signTypedData(
                 replyAction,
@@ -190,6 +193,55 @@ export default class LedgerBridge {
     } catch (e) {
       console.log('LEDGER:::CREATE APP ERROR', e);
       throw e;
+    }
+  }
+
+  async getAppNameAndVersion(replyAction, messageId) {
+    try {
+      await this.makeApp();
+      // See: https://github.com/LedgerHQ/ledger-live/blob/v22.0.1/src/hw/getAppAndVersion.ts  
+      const response = await this.transport.send(0xb0, 0x01, 0x00, 0x00);
+      if (response[0] !== 1) {
+        throw new Error('Incorrect format return from getAppNameAndVersion.');
+      }
+
+      let i = 1;
+      const nameLength = response[i] ?? 0;
+      i += 1;
+
+      const appName = response
+        .slice(i, (i += nameLength))
+        .toString();
+
+      const versionLength = response[i] ?? 0;
+      i += 1;
+
+      const version = response
+        .slice(i, (i += versionLength))
+        .toString();
+
+      const res = {
+        appName,
+        version,
+      };
+
+      this.sendMessageToExtension({
+        action: replyAction,
+        success: true,
+        payload: res,
+        messageId,
+      });
+    } catch (error) {
+      this.sendMessageToExtension({
+        action: replyAction,
+        success: false,
+        payload: { error: serializeError(error) },
+        messageId,
+      });
+    } finally {
+      if (this.transportType !== 'ledgerLive') {
+        this.cleanUp();
+      }
     }
   }
 
