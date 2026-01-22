@@ -103,7 +103,7 @@ export default class LedgerBridge {
               this.attemptMakeApp(replyAction, messageId);
               break;
             case 'ledger-get-app-name-and-version':
-              this.getAppAndName(replyAction, messageId);
+              this.getAppNameAndVersion(replyAction, messageId);
               break;
             case 'ledger-sign-typed-data':
               this.signTypedData(
@@ -196,9 +196,10 @@ export default class LedgerBridge {
     }
   }
 
-  async getAppAndName(replyAction, messageId) {
+  async getAppNameAndVersion(replyAction, messageId) {
     try {
       await this.makeApp();
+      // See: https://github.com/LedgerHQ/ledger-live/blob/v22.0.1/src/hw/getAppAndVersion.ts  
       const response = await this.transport.send(0xb0, 0x01, 0x00, 0x00);
       if (response[0] !== 1) {
         throw new Error('Incorrect format return from getAppNameAndVersion.');
